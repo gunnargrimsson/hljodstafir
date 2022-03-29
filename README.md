@@ -1,3 +1,2 @@
-##  Hljóðstafir
-
-# Private Next.js webapp utilizing Ascanius
+#  Hljóðstafir
+  Private Next.js webapp utilizing Ascanius
