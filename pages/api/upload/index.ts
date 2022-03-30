@@ -1,5 +1,6 @@
 import formidable from 'formidable';
 import fs from 'fs';
+import path from 'path';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
@@ -27,6 +28,13 @@ const saveFile = async (file: formidable.File) => {
 	await fs.unlinkSync(file.filepath);
 	return true;
 };
+
+export const getFiles = async () => {
+	const fileLoc = path.join('public', 'uploads');
+	const files = fs.readdirSync(fileLoc);
+	const mapFiles = files.map((file) => path.join('uploads', file));
+	return { props: { mapFiles } };
+}
 
 export default (req: NextApiRequest, res: NextApiResponse) => {
 	req.method === 'POST'

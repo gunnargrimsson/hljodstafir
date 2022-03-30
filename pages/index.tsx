@@ -1,19 +1,27 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import hbsLogo from '../public/images/hbs.png';
 import arrow from '../public/images/arrow.svg';
+import { Notification } from '@mantine/core';
+import { Check, X } from 'tabler-icons-react';
+import fs from 'fs';
+import path from 'path';
+import { getPageFiles } from 'next/dist/server/get-page-files';
+import { getFiles } from './api/upload';
 
-const IndexPage = () => {
+const IndexPage = ({ mapFiles }) => {
 	const router = useRouter();
 	const redirected = router.query.redirected;
 	const [open, setOpen] = useState(true);
 	const [file, setFile] = useState(null);
 	const [createObjectURL, setCreateObjectURL] = useState<string>(null);
 	const [uploaded, setUploaded] = useState<boolean>(false);
+	const [error, setError] = useState<string>(null);
 	const [uploadMessage, setUploadMessage] = useState<string>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [files, setFiles] = useState<string[]>(mapFiles);
 
 	const Menus = [
 		{ title: 'Dashboard', src: 'Chart_fill' },
@@ -42,7 +50,7 @@ const IndexPage = () => {
 					{Menus.map((Menu, index) => (
 						<li
 							key={index}
-							className={`flex  rounded-md p-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 
+							className={`flex  rounded-sm p-2 cursor-pointer hover:bg-light-white text-gray-300 text-sm items-center gap-x-4 
               ${Menu.gap ? 'mt-9' : 'mt-2'} ${index === 0 && 'bg-light-white'} `}
 						>
 							<Image src={`/../public/images/hbs.png`} width={16} height={16} />
@@ -63,6 +71,11 @@ const IndexPage = () => {
 	};
 
 	const uploadToServer = async (event) => {
+		if (file === null) {
+			setError('No file selected');
+			setUploaded(false);
+			return;
+		}
 		const body = new FormData();
 		body.append('file', file);
 		const res = await fetch('/api/upload', {
@@ -72,6 +85,7 @@ const IndexPage = () => {
 		const data = await res.json();
 		if (data.success) {
 			setUploaded(true);
+			setError(null);
 			setUploadMessage(data.message);
 			setFile(null);
 			setCreateObjectURL(null);
@@ -84,33 +98,52 @@ const IndexPage = () => {
 			<div className='w-full px-5 py-10'>
 				<h1 className='text-2xl font-semibold'>Hljóðstafir</h1>
 			</div>
+			{uploaded && (
+				<Notification onClose={() => setUploaded(false)} icon={<Check size={18} />} color='teal' title='Upload Status'>
+					{uploadMessage}
+				</Notification>
+			)}
+			{error && (
+				<Notification onClose={() => setError(null)} icon={<X size={18} />} color='red' title='Upload Status'>
+					{error}
+				</Notification>
+			)}
 			<div className='bg-gray-200 h-full'>
 				<div className='flex place-content-center justify-center'>
-					<div className='px-5 my-10 py-4 bg-white rounded-md flex flex-col'>
+					<div className='px-5 my-10 py-4 bg-white rounded-sm flex flex-col'>
 						<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
-						{uploaded && uploadMessage && (
-							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>{uploadMessage}</div>
-						)}
 						<input
 							ref={fileInputRef}
 							type='file'
 							name='myImage'
 							accept='.epub'
 							onChange={uploadToClient}
-							className='file:px-4 file:py-2 file:cursor-pointer cursor-pointer file:border-0 file:bg-blue-900 file:text-white file:rounded-md file:hover:bg-blue-700 hover:bg-blue-200 rounded-md'
+							className='file:px-4 file:py-2 file:cursor-pointer cursor-pointer file:border-0 file:bg-blue-900 file:text-white file:rounded-sm file:hover:bg-blue-700 hover:bg-blue-200 rounded-sm'
 						/>
 						<button
-							className='px-4 py-2 mt-2 bg-blue-900 text-white rounded-md hover:bg-blue-700'
+							className='px-4 py-2 mt-2 bg-blue-900 text-white rounded-sm hover:bg-blue-700'
 							type='submit'
 							onClick={uploadToServer}
 						>
-							Send to server
+							Upload
 						</button>
 					</div>
+				</div>
+				<div className='bg-gray-300 flex flex-col'>
+					{files.map((file: string, index: number) => (
+						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
+							<span className='mr-2 font-semibold'>{index}</span>
+							<Link href={'/' + file.split('\\').join('/')}>{file.split('\\').pop()}</Link>
+						</div>
+					))}
 				</div>
 			</div>
 		</div>
 	);
 };
+
+export async function getServerSideProps() {
+	return getFiles();
+}
 
 export default IndexPage;
