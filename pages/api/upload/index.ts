@@ -18,7 +18,7 @@ const upload = multer({
 			cb(null, `${Date.now()}-${file.originalname}`);
 		},
 	}),
-	limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+	limits: { fileSize: 5 * 1024 * 1024 * 1024 * 1024 },
 });
 
 const apiRoute = nextConnect({
