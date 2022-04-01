@@ -13,8 +13,8 @@ const port = process.env.PORT || 3000;
   try {
     await app.prepare();
     const server = express();
-    server.use(express.json());
-    server.use(express.urlencoded({ extended: true }));
+    server.use(express.json({ limit: '1gb' }));
+    server.use(express.urlencoded({ extended: true, limit: '1gb' }));
 
     const upload = multer({
       storage: multer.diskStorage({
