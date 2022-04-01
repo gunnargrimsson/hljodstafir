@@ -4,7 +4,7 @@ import Router, { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import { Notification } from '@mantine/core';
 import { Check, X } from 'tabler-icons-react';
-import { getFiles } from './api/upload';
+import { getFiles } from './api/uploads2';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';
@@ -17,7 +17,7 @@ const IndexPage = ({ mapFiles }) => {
 	const [uploadMessage, setUploadMessage] = useState<string>(null);
 	const [files, setFiles] = useState<string[]>(mapFiles);
 
-	const onChange = async (formData) => {
+	const onChange = async (formData: FormData) => {
 		nProgress.configure({ showSpinner: true });
 		nProgress.start();
 		const config = {

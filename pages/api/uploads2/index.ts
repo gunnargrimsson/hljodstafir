@@ -6,7 +6,9 @@ import multer from 'multer';
 
 export const config = {
 	api: {
-		bodyParser: false,
+		bodyParser: {
+			sizeLimit: '1gb',
+		}
 	},
 };
 
@@ -18,7 +20,7 @@ const upload = multer({
 			cb(null, `${Date.now()}-${file.originalname}`);
 		},
 	}),
-	limits: { fileSize: 5 * 1024 * 1024 * 1024 * 1024 },
+	limits: { fileSize: 1024 * 1024 * 1024 },
 });
 
 const apiRoute = nextConnect({
