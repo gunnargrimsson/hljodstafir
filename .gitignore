@@ -32,6 +32,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# custom
 .vscode/
 public/uploads/*
 dist/
+hours/

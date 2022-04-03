@@ -4,7 +4,7 @@ import Router, { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import { Notification } from '@mantine/core';
 import { Check, X } from 'tabler-icons-react';
-import { getFiles } from './api/uploads2';
+import { getFiles } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';

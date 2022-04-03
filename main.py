@@ -21,17 +21,34 @@ import shutil
 
 if __name__ == "__main__":
     try:
-        language = 'isl'
+        language = sys.argv[3] if sys.argv[3] else 'isl'
         # job is done whenever the for loop below has finished
         jobDone = False
         # bookname takes the name of the book.
+        #? Is it possible to run without explicitly stating a bookname ?
         foldername = sys.argv[1]
         bookname = sys.argv[2]
 
         extract_epub(foldername)
 
+        # ? Steps needed for epub:
+        #     ? 1. Read package.opf
+        #     ? 2. Get the location of all the files in the epub, mainly the xhtml and mp3 files
+        #     ? 3. Markup each xhtml file with sentence level markup instead of paragraph and send them through Aeneas
+        #     ? 4. Replace all the smil references with the new smil references
+        # ! Steps no longer necessary
+        #     ! 1. process smil
+        #     ! 2. clean?
+        #     ! 3. segment?
+        #     ! 4. combine smil files?
+
+        # ? Do we need a folder structure / tree check, or should we just assume that the folder structure is correct ?
+        # ? examples of different folder structures:
+        #     ? 1. EPUB/Content/ (all the files under that directory) (this is the default folder structure for daisy books converted to epub?)
+        #     ? 2. EPUB/ (audio/images/files) (this is the default folder structure for epub books straight out of hindenburg?)
+        #     ? 3. GoogleDoc/ (all the files under that directory) (this is the default folder structure for google docs converted to epub?)
         # Only include the mp3 files and sort for linux env
-        mp3files = [f for f in listdir("./public/uploads/{}/EPUB/Content/".format(foldername)) if isfile(join("./public/uploads/{}/EPUB/Content/".format(foldername), f)) and f.endswith(".mp3") and not 'daisy-online-sample' in f]
+        mp3files = [f for f in listdir("./public/uploads/{}/EPUB/audio/".format(foldername)) if isfile(join("./public/uploads/{}/EPUB/audio/".format(foldername), f)) and f.endswith(".mp3")]
         mp3files.sort()
 
         # Copy original to output before working on it
