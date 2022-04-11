@@ -39,5 +39,4 @@ public/uploads/*
 public/output/*
 dist/
 hours/
-scripts/__pychache__/
-scripts/__pychache__*
+**/__pycache__/
