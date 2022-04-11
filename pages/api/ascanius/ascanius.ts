@@ -4,9 +4,7 @@ import { exec } from 'child_process';
 async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
     const folderName = req.body.folderName;
-    const bookName = req.body.book_name;
-    console.log(bookName);
-	  exec(`python main.py ${folderName} ${bookName}`, (err, stdout, stderr) => {
+	  exec(`python main.py ${folderName}`, (err, stdout, stderr) => {
       console.log(stdout);
       console.log(stderr);
     });
