@@ -69,10 +69,10 @@ const IndexPage = ({ mapFiles }) => {
 					</div>
 				</div>
 				<div className='bg-gray-300 flex flex-col'>
-					{files.map((file: string, index: number) => (
+					{files.map((file: any, index: number) => (
 						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
-							<span className='mr-2 font-semibold'>{index}</span>
-							<Link href={'/' + file.split('\\').join('/')}>{file.split('\\').pop()}</Link>
+							<span className='mr-2 font-semibold'>{index + 1}</span>
+							<Link href={'/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
 						</div>
 					))}
 				</div>
