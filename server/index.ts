@@ -3,6 +3,8 @@ import next, { NextApiRequest, NextApiResponse } from 'next';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
+import ascanius from './controllers/ascanius';
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
@@ -21,10 +23,10 @@ const port = process.env.PORT || 3000;
         destination: './public/uploads',
         filename: (req, file, cb) => {
           console.log(file);
-          cb(null, `${Date.now()}-${file.originalname}`);
+          cb(null, `${file.originalname}`);
         },
       }),
-      limits: { fileSize: 1024 * 1024 * 1024 },
+      limits: { fileSize: 1024 ** 3 },
     });
 
     const uploadFiles = upload.array('files');
@@ -32,8 +34,8 @@ const port = process.env.PORT || 3000;
     server.post('/api/upload', uploadFiles, async (req, res) => {
       const filenames = fs.readdirSync('./public/uploads');
       const files = filenames.map((file) => file);
-      console.log('hello')
       res.status(200).json({ data: files });
+      ascanius(files[0].split('.')[0]);
     });
 
     server.all('*', (req: Request, res: Response) => {
@@ -41,7 +43,7 @@ const port = process.env.PORT || 3000;
     });
     server.listen(port, (err?: Error) => {
       if (err) throw err;
-      console.log(`> Ready on http://localhost:${port} - env ${process.env.NODE_ENV}`);
+      console.log(`> Ready on http://localhost:${port} - env ${process.env.NODE_ENV ? process.env.NODE_ENV : 'development'}`);
     });
   } catch (e) {
     console.error(e);

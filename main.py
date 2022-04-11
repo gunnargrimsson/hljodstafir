@@ -25,14 +25,9 @@ if __name__ == "__main__":
     try:
         language = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
         print("Language selected:", language)
-        # job is done whenever the for loop below has finished
-        jobDone = False
-        # bookname takes the name of the book.
-        #? Is it possible to run without explicitly stating a bookname ?
         foldername = sys.argv[1]
-        # bookname = sys.argv[2]
 
-        # extract_epub(foldername)
+        extract_epub(foldername)
 
         package_opf, location = get_package_opf(foldername)
         if not package_opf:
@@ -74,8 +69,7 @@ if __name__ == "__main__":
             # Execute Task to output path
             ExecuteTask(task).execute()         
             task.output_sync_map_file()
-        jobDone = True
-        
+
         zip_epub(foldername)
         exit() 
         # ? Steps needed for epub:
@@ -96,6 +90,7 @@ if __name__ == "__main__":
         #     ? 2. EPUB/ (audio/images/files) (this is the default folder structure for epub books straight out of hindenburg?)
         #     ? 3. GoogleDoc/ (all the files under that directory) (this is the default folder structure for google docs converted to epub?)
         # Only include the mp3 files and sort for linux env
+        # ! ↓ Old code ↓ currently being skipped (will be removed later)
         mp3files = [f for f in listdir("./public/uploads/{}/EPUB/audio/".format(foldername)) if isfile(join("./public/uploads/{}/EPUB/audio/".format(foldername), f)) and f.endswith(".mp3")]
         mp3files.sort()
 
