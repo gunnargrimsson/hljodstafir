@@ -13,6 +13,8 @@ from scripts.combine import combine_smil_files
 from scripts.remove_extra import remove_extra_files
 from scripts.extract_epub import extract_epub
 from scripts.zip_epub import zip_epub
+from scripts.get_package_opf import get_package_opf
+from scripts.get_files_from_package_opf import get_files_from_package_opf
 import sys
 import shutil
 
@@ -21,21 +23,67 @@ import shutil
 
 if __name__ == "__main__":
     try:
-        language = sys.argv[3] if sys.argv[3] else 'isl'
+        language = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
+        print("Language selected:", language)
         # job is done whenever the for loop below has finished
         jobDone = False
         # bookname takes the name of the book.
         #? Is it possible to run without explicitly stating a bookname ?
         foldername = sys.argv[1]
-        bookname = sys.argv[2]
+        # bookname = sys.argv[2]
 
-        extract_epub(foldername)
+        # extract_epub(foldername)
 
+        package_opf, location = get_package_opf(foldername)
+        if not package_opf:
+            raise Exception("Could not find package.opf, Not a valid EPUB File.\nPlease fix, refresh and try again.")
+
+        audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
+        text_files = get_files_from_package_opf(package_opf, 'application/xhtml+xml')
+
+        print("{} - Number of mp3 files: {}".format(datetime.now().time().strftime("%H:%M:%S"), len(audio_files)))
+        print("{} - Number of segments: {}".format(datetime.now().time().strftime("%H:%M:%S"), len(text_files)))
+        # Clear buffer
+        sys.stdout.flush()
+
+        segmentation_correct = len(audio_files) == len(text_files)
+
+        markup(foldername, location, text_files)
+
+        # Makes sure that all spans with class="sentence" have some ID
+        # generate_id(foldername)
+        if not segmentation_correct:
+            print("ERROR: {} - Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.".format(datetime.now().time().strftime("%H:%M:%S")))
+            raise Exception("Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.")
+
+        for i, mp3 in enumerate(audio_files):
+            # Setup config string & absolute file path for audio/text/syncfile
+            config_string = u"task_language={}|is_text_type=unparsed|os_task_file_format=smil|os_task_file_smil_audio_ref={}|os_task_file_smil_page_ref={}".format(language, mp3, text_files[i])
+            # Create Task
+            task = Task(config_string=config_string)
+            task.audio_file_path_absolute = u"./public/uploads/{}/{}{}".format(foldername, location, mp3)
+            task.text_file_path_absolute = u"./public/uploads/{}/{}{}".format(foldername, location, text_files[i])
+            # Each smil file is named the expected smil_prefix + number with leading zeros (3 or 4)
+            task.sync_map_file_path_absolute = u"./public/uploads/{}/{}{}.smil".format(foldername, location, text_files[i].split('.')[0])
+
+            # stdout.flush forces the progress print to be relayed to the server in real time
+            print("{} - {}/{}".format(datetime.now().time().strftime("%H:%M:%S"), i+1, len(audio_files)))
+            # Clear buffer
+            sys.stdout.flush()
+
+            # Execute Task to output path
+            ExecuteTask(task).execute()         
+            task.output_sync_map_file()
+        jobDone = True
+        
+        zip_epub(foldername)
+        exit() 
         # ? Steps needed for epub:
+        #     ? 0. Find package.opf
         #     ? 1. Read package.opf
         #     ? 2. Get the location of all the files in the epub, mainly the xhtml and mp3 files
         #     ? 3. Markup each xhtml file with sentence level markup instead of paragraph and send them through Aeneas
-        #     ? 4. Replace all the smil references with the new smil references
+        #     ? 4. Replace all the smil references with the new smil references? Same number of smil files as hindenburg puts into package.opf (if same name then not needed?)
         # ! Steps no longer necessary
         #     ! 1. process smil
         #     ! 2. clean?
