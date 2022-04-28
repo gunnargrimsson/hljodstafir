@@ -8,3 +8,10 @@ export type User = {
   id: number
   name: string
 }
+
+export interface socketMessage {
+	message: string;
+	delivered: string;
+	highlight: boolean;
+	color: string;
+}
