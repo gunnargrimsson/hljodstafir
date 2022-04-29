@@ -25,18 +25,36 @@ interface clientInfo {
 	userID?: string;
 }
 
+interface IFile {
+	name: string;
+	date: string;
+	size: number;
+	sizeInMB: string;
+	url: string;
+}
+
+interface IFetchProps {
+	data: {
+		files: {
+			props: {
+				mapFiles: IFile[];
+			}
+		}
+	}
+}
+
 const IndexPage = ({ mapFiles }) => {
 	const router = useRouter();
 	const redirected = router.query.redirected;
 	const [uploaded, setUploaded] = useState<boolean>(false);
 	const [error, setError] = useState<string>(null);
 	const [uploadMessage, setUploadMessage] = useState<string>(null);
-	const [files, setFiles] = useState<string[]>(mapFiles);
+	const [files, setFiles] = useState<IFile[]>(mapFiles);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
 	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
 	const [connected, setConnected] = useState<boolean>(false);
 
-	const connectUser = () => {
+	const connectUser = async () => {
 		if (!connected) {
 			if (client['userID'] && client['sessionID']) {
 				console.log(client['userID'], 'found, connecting socket');
@@ -52,8 +70,14 @@ const IndexPage = ({ mapFiles }) => {
 	};
 
 	useEffect(() => {
-		// console.log(messages);
 		connectUser();
+		socket.on('ascanius-done', async (message: socketMessage) => {
+			setMessages((messages) => [...messages, message]);
+			const fetchFiles: IFetchProps = await axios.get('http://localhost:3000/api/files');
+			if (fetchFiles?.data?.files?.props?.mapFiles) {
+				setFiles(fetchFiles.data.files.props.mapFiles);
+			}
+		});
 		socket.on('ascanius-error', (message: socketMessage) => {
 			setUploaded(false);
 			setError(message.message);
@@ -72,8 +96,11 @@ const IndexPage = ({ mapFiles }) => {
 
 		return () => {
 			socket.off('ascanius-relay');
+			socket.off('ascanius-done');
+			socket.off('ascanius-error');
+			socket.off('user-connected');
 		};
-	}, [messages]);
+	}, [messages, files]);
 
 	const onChange = async (formData: FormData) => {
 		nProgress.configure({ showSpinner: true });

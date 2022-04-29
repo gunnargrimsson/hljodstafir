@@ -1,6 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
+const handler = async (req: any, res: any) => {
+	const files = await getFiles();
+	res.status(200).json({ files });
+};
+
 export const getFiles = async () => {
 	const fileLoc = path.join('public', 'output');
 	const files = fs.readdirSync(fileLoc);
@@ -21,3 +26,5 @@ export const getFiles = async () => {
 	});
 	return { props: { mapFiles } };
 };
+
+export default handler;

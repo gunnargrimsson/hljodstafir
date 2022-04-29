@@ -72,6 +72,8 @@ if __name__ == "__main__":
             task.output_sync_map_file()
 
         zip_epub(foldername)
+        print("DONE")
+        sys.stdout.flush()
         exit() 
         # ? Steps needed for epub:
         #     ? 0. Find package.opf

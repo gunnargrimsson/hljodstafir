@@ -1,1 +1,1 @@
-export { getFiles } from './files';
+export { default, getFiles } from './files';
