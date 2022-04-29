@@ -8,6 +8,8 @@ import ascanius from './controllers/ascanius';
 import http from 'http';
 import { initIO } from './controllers/socket';
 import { Server, Socket } from 'socket.io';
+import { v4 as uuidv4 } from 'uuid';
+import { extendedSocket } from '../interfaces';
 
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
@@ -42,18 +44,38 @@ const port = process.env.PORT || 3000;
 			res.status(200).json({ data: files });
 		});
 
-    io.on('connection', (socket: Socket) => {
-			console.log('Connected to socket');
+		// temp session database
+		let sessionStore = {};
 
-      socket.on('ascanius', (data) => {
-        ascanius(data, socket);
+		io.use((socket: extendedSocket, next) => {
+			console.log(sessionStore);
+			const sessionID = socket.handshake.auth.sessionID;
+			if (sessionID) {
+				// find existing session
+				const session = sessionStore[sessionID];
+				if (session) {
+					socket.sessionID = sessionID;
+					socket.userID = session.userID;
+					return next();
+				}
+			}
+			// create new session
+			socket.sessionID = uuidv4();
+			socket.userID = uuidv4();
+			sessionStore[socket.sessionID] = { userID: socket.userID, sessionID: socket.sessionID };
+			next();
+		});
+
+    io.on('connection', async (socket: extendedSocket) => {
+			await socket.join(socket.sessionID);
+			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
+
+      socket.on('ascanius', (folderName: string) => {
+				// Need to send the info to sender so we throw him the io reference
+        ascanius(folderName, socket.sessionID, io);
       });
 
-      socket.on('ascanius-relay', (data) => {
-        console.log('relay: ', data);
-      });
-
-			socket.on('disconnect', (t) => {
+			socket.on('disconnect', (data) => {
         socket.emit('user-disconnect');
 				console.log('user disconnected');
 			});

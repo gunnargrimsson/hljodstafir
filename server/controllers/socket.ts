@@ -1,4 +1,4 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 
 let io;
 
@@ -8,7 +8,6 @@ const initIO = (server) => {
 };
 
 const getIO = () => {
-  console.log('getIO called');
   if (!io) {
     throw new Error('Socket.io not initialized');
   }

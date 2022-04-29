@@ -1,15 +1,28 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Router, { useRouter } from 'next/router';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Notification } from '@mantine/core';
 import { Check, X } from 'tabler-icons-react';
 import { getFiles } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
+import useLocalStorage from '../hooks/useLocalStorage';
+
+interface clientExtendedSocket extends Socket {
+	sessionID?: string;
+	userID?: string;
+}
+
+const socket: clientExtendedSocket = io('http://localhost:3000', { autoConnect: false });
+
+interface clientInfo {
+	sessionID?: string;
+	userID?: string;
+}
 
 const IndexPage = ({ mapFiles }) => {
 	const router = useRouter();
@@ -19,13 +32,41 @@ const IndexPage = ({ mapFiles }) => {
 	const [uploadMessage, setUploadMessage] = useState<string>(null);
 	const [files, setFiles] = useState<string[]>(mapFiles);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
+	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
+	const [connected, setConnected] = useState<boolean>(false);
 
-	const socket = io('http://localhost:3000');
+	const connectUser = () => {
+		if (!connected) {
+			if (client['userID'] && client['sessionID']) {
+				console.log(client['userID'], 'found, connecting socket');
+				socket.auth = { sessionID: client['sessionID'] };
+				socket.connect();
+				setConnected(true);
+			} else {
+				console.log('no user found, connecting new socket');
+				socket.connect();
+				setConnected(true);
+			}
+		}
+	};
 
 	useEffect(() => {
-		socket.on('ascanius-relay', (message) => {
+		console.log(messages);
+		connectUser();
+		socket.on('ascanius-relay', (message: socketMessage) => {
 			setMessages((messages) => [...messages, message]);
 		});
+		socket.on('user-connected', ({ sessionID, userID }: { sessionID: string; userID: string }) => {
+			console.log('userID:', userID);
+			console.log('sessionID:', sessionID);
+			socket.auth = { sessionID };
+			socket.userID = userID;
+			setClient({ sessionID, userID });
+		});
+
+		return () => {
+			socket.off('ascanius-relay');
+		};
 	}, [messages]);
 
 	const onChange = async (formData: FormData) => {
@@ -48,6 +89,7 @@ const IndexPage = ({ mapFiles }) => {
 			setUploaded(true);
 			setError(null);
 			try {
+				console.log('try');
 				socket.emit('ascanius', res.data.data[0].split('.')[0]);
 			} catch (error) {
 				console.error(error);

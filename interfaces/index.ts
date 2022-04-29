@@ -4,6 +4,8 @@
 //
 // import { User } from 'path/to/interfaces';
 
+import { Socket } from "socket.io";
+
 export type User = {
   id: number
   name: string
@@ -14,4 +16,9 @@ export interface socketMessage {
 	delivered: string;
 	highlight: boolean;
 	color: string;
+}
+
+export interface extendedSocket extends Socket {
+	sessionID: string;
+	userID: string;
 }

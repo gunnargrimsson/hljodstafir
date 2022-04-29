@@ -1,8 +1,8 @@
 import { spawn } from 'child_process';
-import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { socketMessage } from '../../interfaces';
 
-const ascanius = (folderName: string, socket: Socket) => {
+const ascanius = (folderName: string, userID: string, io: Server) => {
 	try {
 		const process = spawn('python', ['main.py', folderName]);
 		process.stdout.on('data', (data) => {
@@ -13,7 +13,8 @@ const ascanius = (folderName: string, socket: Socket) => {
 				highlight: hasError ? true : false,
 				color: hasError ? 'text-red-500' :'text-black',
 			};
-			socket.emit('ascanius-relay', message);
+			console.log('sending message to', userID);
+			io.to(userID).emit('ascanius-relay', message);
 		});
 		process.stderr.on('data', (data) => {
 			// Errors also get relayed, in case of crashes
@@ -23,7 +24,7 @@ const ascanius = (folderName: string, socket: Socket) => {
 				highlight: true,
 				color: 'text-red-500',
 			};
-			socket.emit('ascanius-relay', message);
+			io.to(userID).emit('ascanius-relay', message);
 		});
 	} catch (error) {
 		console.error(error);
