@@ -52,14 +52,19 @@ const IndexPage = ({ mapFiles }) => {
 	};
 
 	useEffect(() => {
-		console.log(messages);
+		// console.log(messages);
 		connectUser();
+		socket.on('ascanius-error', (message: socketMessage) => {
+			setUploaded(false);
+			setError(message.message);
+			setMessages((messages) => [...messages, message]);
+		});
 		socket.on('ascanius-relay', (message: socketMessage) => {
 			setMessages((messages) => [...messages, message]);
 		});
 		socket.on('user-connected', ({ sessionID, userID }: { sessionID: string; userID: string }) => {
-			console.log('userID:', userID);
-			console.log('sessionID:', sessionID);
+			// console.log('userID:', userID);
+			// console.log('sessionID:', sessionID);
 			socket.auth = { sessionID };
 			socket.userID = userID;
 			setClient({ sessionID, userID });
@@ -90,7 +95,6 @@ const IndexPage = ({ mapFiles }) => {
 			setUploaded(true);
 			setError(null);
 			try {
-				console.log('try');
 				socket.emit('ascanius', res.data.data[0].split('.')[0]);
 			} catch (error) {
 				console.error(error);

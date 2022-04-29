@@ -11,7 +11,6 @@ const ascanius = (folderName: string, userID: string, io: Server) => {
 				message: data.toString(),
 				delivered: new Date().toISOString(),
 				highlight: hasError ? true : false,
-				color: hasError ? 'text-red-500' :'text-black',
 			};
 			io.to(userID).emit('ascanius-relay', message);
 		});
@@ -21,9 +20,8 @@ const ascanius = (folderName: string, userID: string, io: Server) => {
 				message: data.toString(),
 				delivered: new Date().toISOString(),
 				highlight: true,
-				color: 'text-red-500',
 			};
-			io.to(userID).emit('ascanius-relay', message);
+			io.to(userID).emit('ascanius-error', message);
 		});
 	} catch (error) {
 		console.error(error);

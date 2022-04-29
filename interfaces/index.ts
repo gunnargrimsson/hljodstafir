@@ -15,7 +15,6 @@ export interface socketMessage {
 	message: string;
 	delivered: string;
 	highlight: boolean;
-	color: string;
 }
 
 export interface extendedSocket extends Socket {

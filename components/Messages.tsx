@@ -1,6 +1,6 @@
-import { Blockquote, Text, Timeline } from '@mantine/core';
+import { Blockquote, Timeline } from '@mantine/core';
 import React from 'react';
-import { Check, GitBranch, X } from 'tabler-icons-react';
+import { Check, X } from 'tabler-icons-react';
 import { socketMessage } from '../interfaces';
 
 const Messages = ({ messages }: { messages: socketMessage[] }) => {

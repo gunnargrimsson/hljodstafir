@@ -1,13 +1,11 @@
 import express, { Request, Response } from 'express';
-import next, { NextApiRequest, NextApiResponse } from 'next';
+import next from 'next';
 import multer from 'multer';
-import path from 'path';
 import fs from 'fs';
-import axios from 'axios';
 import ascanius from './controllers/ascanius';
 import http from 'http';
 import { initIO } from './controllers/socket';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { extendedSocket } from '../interfaces';
 
@@ -71,7 +69,7 @@ const port = process.env.PORT || 3000;
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
       socket.on('ascanius', (folderName: string) => {
-				// Need to send the info to sender so we throw him the io reference
+				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
         ascanius(folderName, socket.sessionID, io);
       });
 
