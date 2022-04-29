@@ -25,6 +25,7 @@ if __name__ == "__main__":
     try:
         language = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
         print("Language selected:", language)
+        sys.stdout.flush()
         foldername = sys.argv[1]
 
         extract_epub(foldername)
@@ -36,9 +37,9 @@ if __name__ == "__main__":
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
         text_files = get_files_from_package_opf(package_opf, 'application/xhtml+xml')
 
-        print("{} - Number of mp3 files: {}".format(datetime.now().time().strftime("%H:%M:%S"), len(audio_files)))
-        print("{} - Number of segments: {}".format(datetime.now().time().strftime("%H:%M:%S"), len(text_files)))
-        # Clear buffer
+        print("Number of mp3 files: {}".format(len(audio_files)))
+        sys.stdout.flush()
+        print("Number of text segments: {}".format(len(text_files)))
         sys.stdout.flush()
 
         segmentation_correct = len(audio_files) == len(text_files)
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         # Makes sure that all spans with class="sentence" have some ID
         # generate_id(foldername)
         if not segmentation_correct:
-            print("ERROR: {} - Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.".format(datetime.now().time().strftime("%H:%M:%S")))
+            print("ERROR: Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.")
             raise Exception("Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.")
 
         for i, mp3 in enumerate(audio_files):
@@ -62,7 +63,7 @@ if __name__ == "__main__":
             task.sync_map_file_path_absolute = u"./public/uploads/{}/{}{}.smil".format(foldername, location, text_files[i].split('.')[0])
 
             # stdout.flush forces the progress print to be relayed to the server in real time
-            print("{} - {}/{}".format(datetime.now().time().strftime("%H:%M:%S"), i+1, len(audio_files)))
+            print("Processing.. {}/{}".format(i+1, len(audio_files)))
             # Clear buffer
             sys.stdout.flush()
 

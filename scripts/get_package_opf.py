@@ -18,7 +18,8 @@ def get_package_opf(foldername: str):
       pass
   
   if not found_location:
-    print("Could not find package.opf")
+    print("ERROR: Could not find package.opf")
+    sys.stdout.flush()
     return False
 
   with open('././public/uploads/{}/{}/package.opf'.format(foldername, found_location), 'r', encoding='utf8') as f:

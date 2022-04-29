@@ -6,14 +6,13 @@ const ascanius = (folderName: string, userID: string, io: Server) => {
 	try {
 		const process = spawn('python', ['main.py', folderName]);
 		process.stdout.on('data', (data) => {
-			const hasError = data.toString().toLowerCase().includes('ERROR');
+			const hasError = data.toString().toLowerCase().includes('error');
 			const message: socketMessage = {
 				message: data.toString(),
 				delivered: new Date().toISOString(),
 				highlight: hasError ? true : false,
 				color: hasError ? 'text-red-500' :'text-black',
 			};
-			console.log('sending message to', userID);
 			io.to(userID).emit('ascanius-relay', message);
 		});
 		process.stderr.on('data', (data) => {

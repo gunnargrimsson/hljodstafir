@@ -11,6 +11,7 @@ import nProgress from 'nprogress';
 import { io, Socket } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
 import useLocalStorage from '../hooks/useLocalStorage';
+import Messages from '../components/Messages';
 
 interface clientExtendedSocket extends Socket {
 	sessionID?: string;
@@ -132,29 +133,7 @@ const IndexPage = ({ mapFiles }) => {
 							/>
 						</div>
 					)}
-					{messages.length > 0 && (
-						<div className='px-5 my-10 py-4 w-1/2 bg-white rounded-sm flex flex-col'>
-							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Messages</div>
-							<div className='flex flex-col w-full p-4 bg-gray-400 rounded-sm overflow-y-auto gap-1'>
-								{messages
-									.sort((a, b) => new Date(b.delivered).getTime() - new Date(a.delivered).getTime())
-									.map((message, idx) => {
-										return (
-											<div key={idx} className={`${message.highlight && 'text-lg font-bold'} rounded-sm bg-white`}>
-												<article className='flex'>
-													<h1 className={`flex flex-1 p-2 pr-2 text-center prose ${message.color && message.color}`}>
-														{new Date(message.delivered).toLocaleString('en-GB').replace(',', '')}
-													</h1>
-													<p className={`flex flex-0 p-2 place-items-center prose ${message.color && message.color}`}>
-														{message.message}
-													</p>
-												</article>
-											</div>
-										);
-									})}
-							</div>
-						</div>
-					)}
+					<Messages messages={messages} />
 				</div>
 				<div className='bg-gray-300 flex flex-col'>
 					{files.map((file: any, index: number) => (

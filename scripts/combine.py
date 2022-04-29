@@ -19,10 +19,12 @@ def combine_smil_files(foldername):
 
     if (len(smil_files) == 0):
         print("No smil files found in {}".format(foldername))
+        sys.stdout.flush()
         return
 
     if (len(smil_files) == 1):
         print("Only one smil file found in {}".format(foldername))
+        sys.stdout.flush()
         return
 
     for index, smil_file in enumerate(smil_files):
@@ -38,6 +40,7 @@ def combine_smil_files(foldername):
     combinedSoupBody.append('\n')
 
     print("Combined {} smil files into one".format(len(smil_files)))
+    sys.stdout.flush()
 
     # Find the smil file reference in package.opf or create if it doesn't exist
     with open('././public/uploads/{}/EPUB/package.opf'.format(foldername), 'r', encoding='utf8') as f:
