@@ -3,7 +3,7 @@ import path from 'path';
 
 const handler = async (req: any, res: any) => {
 	const files = await getFiles();
-	res.status(200).json({ files });
+	res.status(200).json({ files: files.props.mapFiles });
 };
 
 export const getFiles = async () => {

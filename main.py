@@ -1,11 +1,13 @@
+import os
 from aeneas.executetask import ExecuteTask
 from aeneas.task import Task
-from os import listdir, remove
+from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 from scripts.markup import markup
 from scripts.generate_ids import generate_id
 from scripts.clean import clean
+from scripts.remove_files import remove_files
 from scripts.segment import segment
 from scripts.prefix import get_smil_prefix
 # from scripts.smil_process import process_smil_files
@@ -16,7 +18,7 @@ from scripts.zip_epub import zip_epub
 from scripts.get_package_opf import get_package_opf
 from scripts.get_files_from_package_opf import get_files_from_package_opf
 import sys
-import shutil
+import time
 
 # ! Changing to epub only scripts will not support daisy books anymore ?
 # ? Do I need to support both daisy books and epub books ?
@@ -39,18 +41,18 @@ if __name__ == "__main__":
 
         print("Number of mp3 files: {}".format(len(audio_files)))
         sys.stdout.flush()
+        time.sleep(0.1)
         print("Number of text segments: {}".format(len(text_files)))
         sys.stdout.flush()
 
         segmentation_correct = len(audio_files) == len(text_files)
-
-        markup(foldername, location, text_files)
-
-        # Makes sure that all spans with class="sentence" have some ID
-        # generate_id(foldername)
         if not segmentation_correct:
             print("ERROR: Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.")
             raise Exception("Number of mp3 files and number of segments do not match.\nPlease fix, refresh and try again.")
+        
+        markup(foldername, location, text_files)
+        #? generate_id(foldername)
+        #? clean(foldername)
 
         for i, mp3 in enumerate(audio_files):
             # Setup config string & absolute file path for audio/text/syncfile
@@ -74,7 +76,8 @@ if __name__ == "__main__":
         zip_epub(foldername)
         print("DONE")
         sys.stdout.flush()
-        exit() 
+        remove_files(foldername)
+        exit()
         # ? Steps needed for epub:
         #     ? 0. Find package.opf
         #     ? 1. Read package.opf

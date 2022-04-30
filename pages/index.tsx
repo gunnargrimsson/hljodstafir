@@ -35,11 +35,7 @@ interface IFile {
 
 interface IFetchProps {
 	data: {
-		files: {
-			props: {
-				mapFiles: IFile[];
-			}
-		}
+		files: IFile[];
 	}
 }
 
@@ -74,8 +70,8 @@ const IndexPage = ({ mapFiles }) => {
 		socket.on('ascanius-done', async (message: socketMessage) => {
 			setMessages((messages) => [...messages, message]);
 			const fetchFiles: IFetchProps = await axios.get('http://localhost:3000/api/files');
-			if (fetchFiles?.data?.files?.props?.mapFiles) {
-				setFiles(fetchFiles.data.files.props.mapFiles);
+			if (fetchFiles?.data?.files) {
+				setFiles(fetchFiles.data.files);
 			}
 		});
 		socket.on('ascanius-error', (message: socketMessage) => {

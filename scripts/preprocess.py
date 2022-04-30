@@ -27,9 +27,9 @@ def preprocess(foldername, bookname):
     # replace each id that has space in it with an underscore
     for line in original:
       # if line is found then we have to search for the id in all smil files
-      for f in os.listdir("././public/uploads/{EPUB/Content/}/".format(foldername)):
+      for f in os.listdir("././public/uploads/{}/EPUB/Content/".format(foldername)):
         if f.endswith(".smil"):
-          with open("././public/uploads/EPUB/Content/{}/{}".format(foldername, f), "r", encoding='utf-8') as cf:
+          with open("././public/uploads/{}/EPUB/Content/{}".format(foldername, f), "r", encoding='utf-8') as cf:
             current_smil = cf.read()
           current_soup = BeautifulSoup(current_smil, 'html.parser')
           current_original = current_soup.find_all(re.compile("text"), id=line['id'])
@@ -40,11 +40,11 @@ def preprocess(foldername, bookname):
               current_original[issue]['id'] = current_original[issue]['id'].replace(" ", "_")
               current_original[issue]['src'] = current_original[issue]['src'].replace(" ", "_")
             # Replace the original smil file with a preprocessed smil file
-            with open("././public/uploads/EPUB/Content/{}/{}".format(foldername, f), "w", encoding='utf-8') as cf:
+            with open("././public/uploads/{}/EPUB/Content/{}".format(foldername, f), "w", encoding='utf-8') as cf:
               cf.write(str(current_soup))
       line['id'] = line['id'].replace(" ", "_")
     # Replace the original file with a preprocessed html file
-    with open("././public/uploads/EPUB/Content/{}/{}.xhtml".format(foldername, bookname), "w", encoding='utf-8') as f:
+    with open("././public/uploads/{}/EPUB/Content/{}.xhtml".format(foldername, bookname), "w", encoding='utf-8') as f:
       f.write(str(soup))
     print("Preprocess Finished")
     sys.stdout.flush()
