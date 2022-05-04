@@ -4,6 +4,8 @@ from os import listdir
 from os.path import isfile, join
 import sys
 
+from scripts.print_and_flush import print_and_flush
+
 xml = '<?xml version="1.0" encoding="utf-8"?>'
 top = '<smil xmlns="http://www.w3.org/ns/SMIL" xmlns:epub="http://www.idpf.org/2007/ops" version="3.0">\n<body>'
 bottom = '</body>\n</smil>'
@@ -18,13 +20,11 @@ def combine_smil_files(foldername):
     combinedSoupBody = combinedSoup.find(re.compile('body'))
 
     if (len(smil_files) == 0):
-        print("No smil files found in {}".format(foldername))
-        sys.stdout.flush()
+        print_and_flush("No SMIL files found in {}".format(foldername))
         return
 
     if (len(smil_files) == 1):
-        print("Only one smil file found in {}".format(foldername))
-        sys.stdout.flush()
+        print_and_flush("Only one SMIL file found in {}".format(foldername))
         return
 
     for index, smil_file in enumerate(smil_files):
@@ -39,9 +39,8 @@ def combine_smil_files(foldername):
         combinedSoupBody.append(smilSoupSeq)
     combinedSoupBody.append('\n')
 
-    print("Combined {} smil files into one".format(len(smil_files)))
-    sys.stdout.flush()
-
+    print_and_flush("Combining {} SMIL files into one".format(len(smil_files)))
+    
     # Find the smil file reference in package.opf or create if it doesn't exist
     with open('././public/uploads/{}/EPUB/package.opf'.format(foldername), 'r', encoding='utf8') as f:
         packageOPF = f.read()

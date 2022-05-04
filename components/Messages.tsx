@@ -19,7 +19,7 @@ const Messages = ({ messages }: { messages: socketMessage[] }) => {
 									<Timeline.Item
                     key={idx}
                     bullet={message.highlight ? <X /> : <Check />}
-                    color={message.highlight ? 'red' : 'blue'}
+                    color={message.message.includes('DONE') ? 'green' : message.highlight ? 'red' : 'blue'}
 										title={new Date(message.delivered).toLocaleString('en-GB').replace(',', '')}
 									>
 										<Blockquote cite={null} icon={null}>{message.message}</Blockquote>

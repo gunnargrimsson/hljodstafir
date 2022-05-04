@@ -4,13 +4,14 @@ import os
 import re
 from bs4 import BeautifulSoup
 
+from scripts.print_and_flush import print_and_flush
+
 def preprocess(foldername, bookname):
   # In cases where no bookname was given or found and gets returned as null don't run
   if bookname == 'null':
     return
   try:
-    print("Preprocessing", foldername)
-    sys.stdout.flush()
+    print_and_flush("Preprocessing {}".format(bookname))
     # Many html files have unicodes that utf-8 cant handle
     with open("././public/uploads/EPUB/Content/{}/{}.xhtml".format(foldername, bookname), "r", encoding='utf-8') as f:
       html_doc = f.read()
@@ -35,8 +36,7 @@ def preprocess(foldername, bookname):
           current_original = current_soup.find_all(re.compile("text"), id=line['id'])
           if len(current_original) > 0:
             for issue in range(len(current_original)):
-              print("Replacing {} with {} in {}".format(current_original[issue]['id'], current_original[issue]['id'].replace(" ", "_"), current_smil))
-              sys.stdout.flush()
+              print_and_flush("Replacing {} with {} in {}".format(current_original[issue]['id'], current_original[issue]['id'].replace(" ", "_"), current_smil))
               current_original[issue]['id'] = current_original[issue]['id'].replace(" ", "_")
               current_original[issue]['src'] = current_original[issue]['src'].replace(" ", "_")
             # Replace the original smil file with a preprocessed smil file
@@ -46,10 +46,8 @@ def preprocess(foldername, bookname):
     # Replace the original file with a preprocessed html file
     with open("././public/uploads/{}/EPUB/Content/{}.xhtml".format(foldername, bookname), "w", encoding='utf-8') as f:
       f.write(str(soup))
-    print("Preprocess Finished")
-    sys.stdout.flush()
+    print_and_flush("Preprocessing complete")
   except Exception as exception:
-    print("Error:", exception)
-    sys.stderr.flush()
+    print_and_flush("ERROR: {}".format(exception))
 
 preprocess(sys.argv[1], sys.argv[2])

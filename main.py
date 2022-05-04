@@ -7,6 +7,7 @@ from datetime import datetime
 from scripts.markup import markup
 from scripts.generate_ids import generate_id
 from scripts.clean import clean
+from scripts.print_and_flush import print_and_flush
 from scripts.remove_files import remove_files
 from scripts.segment import segment
 from scripts.prefix import get_smil_prefix
@@ -18,7 +19,6 @@ from scripts.zip_epub import zip_epub
 from scripts.get_package_opf import get_package_opf
 from scripts.get_files_from_package_opf import get_files_from_package_opf
 import sys
-import time
 
 # ! Changing to epub only scripts will not support daisy books anymore ?
 # ? Do I need to support both daisy books and epub books ?
@@ -26,8 +26,7 @@ import time
 if __name__ == "__main__":
     try:
         language = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
-        print("Language selected:", language)
-        sys.stdout.flush()
+        print_and_flush("Language: {}".format(language))
         foldername = sys.argv[1]
 
         extract_epub(foldername)
@@ -39,11 +38,8 @@ if __name__ == "__main__":
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
         text_files = get_files_from_package_opf(package_opf, 'application/xhtml+xml')
 
-        print("Number of mp3 files: {}".format(len(audio_files)))
-        sys.stdout.flush()
-        time.sleep(0.1)
-        print("Number of text segments: {}".format(len(text_files)))
-        sys.stdout.flush()
+        print_and_flush("Audio Files: {}".format(len(audio_files)))
+        print_and_flush("Text Files: {}".format(len(text_files)), 0.1)
 
         segmentation_correct = len(audio_files) == len(text_files)
         if not segmentation_correct:
@@ -65,17 +61,14 @@ if __name__ == "__main__":
             task.sync_map_file_path_absolute = u"./public/uploads/{}/{}{}.smil".format(foldername, location, text_files[i].split('.')[0])
 
             # stdout.flush forces the progress print to be relayed to the server in real time
-            print("Processing.. {}/{}".format(i+1, len(audio_files)))
-            # Clear buffer
-            sys.stdout.flush()
+            print_and_flush("Processing.. {}/{}".format(i+1, len(audio_files)))
 
             # Execute Task to output path
             ExecuteTask(task).execute()         
             task.output_sync_map_file()
 
         zip_epub(foldername)
-        print("DONE")
-        sys.stdout.flush()
+        print_and_flush("DONE")
         remove_files(foldername)
         exit()
         # ? Steps needed for epub:

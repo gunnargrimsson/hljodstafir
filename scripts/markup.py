@@ -5,6 +5,8 @@ import math
 import warnings
 import sys
 
+from scripts.print_and_flush import print_and_flush
+
 #TODO: Something is wrong with the marking of sentences here, hix h1 tags are not marked as sentences and will therefore not get the time alloted to them?
 #TODO: Do I just need to clean each text file before running through Aeneas? To get a better smil file? Make some temporary clean files and delete them after?
 
@@ -106,8 +108,5 @@ def markup(foldername: str, location: str, text_files: list):
         with open('././public/uploads/{}/{}{}'.format(foldername, location, text_file), 'w', encoding='utf8') as f:
           f.write(soup.decode("utf8"))
   except Exception as e:
-    print('ERROR: Processing text file index: {} failed.'.format(current_text_file))
-    sys.stdout.flush()
-    print('ERROR:', e);
-    sys.stdout.flush()
+    print_and_flush('ERROR: Processing file {} failed with error: {}'.format(current_text_file, e))
     return False
