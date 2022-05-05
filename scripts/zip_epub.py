@@ -8,7 +8,7 @@ def zip_epub(foldername):
   for file in os.listdir('./public/output/'):
     if file.endswith('.epub'):
       if file.startswith(foldername):
-        epub_exists =+ 1
+        epub_exists += 1
   # conditionally add (x) to the filename if x epub files exist with the same name
   epub_exists_condition = "({})".format(epub_exists) if epub_exists > 0 else ""
   # check if file exists with foldername
