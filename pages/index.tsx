@@ -18,7 +18,7 @@ interface clientExtendedSocket extends Socket {
 	userID?: string;
 }
 
-const socket: clientExtendedSocket = io('http://localhost:3000', { autoConnect: false });
+const socket: clientExtendedSocket = io('http://10.170.68.14', { autoConnect: false });
 
 interface clientInfo {
 	sessionID?: string;
