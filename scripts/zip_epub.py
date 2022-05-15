@@ -1,8 +1,11 @@
+from fileinput import filename
 import os
 import shutil
 import sys
 
-def zip_epub(foldername):
+from scripts.logger import Logger
+
+def check_epub_exists(foldername):
   epub_exists = 0
   # check if any zip file with foldername exist
   for file in os.listdir('./public/output/'):
@@ -15,10 +18,16 @@ def zip_epub(foldername):
   if os.path.exists('./public/output/{}{}.epub'.format(foldername, epub_exists_condition)):
     # add (x) to the foldername
     epub_exists_condition = epub_exists_condition + '{}'.format(epub_exists_condition)
+  return '{}{}'.format(foldername, epub_exists_condition)
+
+def zip_epub(foldername, finalname, logger: Logger):
   # zip up contents of one folder uncompressed
-  shutil.make_archive('././public/uploads/{}{}'.format(foldername, epub_exists_condition), 'zip', '././public/uploads/{}'.format(foldername))
-  # rename the zip file to the original epub file name and move the file to the output folder
-  os.rename('././public/uploads/{}{}.zip'.format(foldername, epub_exists_condition), '././public/output/{}{}.epub'.format(foldername, epub_exists_condition))
+  try:
+    shutil.make_archive('./public/uploads/{}'.format(finalname), 'zip', './public/uploads/{}'.format(foldername))
+    # rename the zip file to the original epub file name and move the file to the output folder
+    os.rename('./public/uploads/{}.zip'.format(finalname), './public/output/{}.epub'.format(finalname))
+  except Exception as e:
+    logger.print_and_flush("ERROR: {}".format(e))
 
 if __name__ == '__main__':
   zip_epub(sys.argv[1])

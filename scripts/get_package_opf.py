@@ -1,10 +1,9 @@
 from os import listdir
 from os.path import isfile, join
 import sys
+from scripts.logger import Logger
 
-from scripts.print_and_flush import print_and_flush
-
-def get_package_opf(foldername: str):
+def get_package_opf(foldername: str, logger: Logger):
   possible_locations = ['EPUB/', 'EPUB/Content/', 'OEBPS/', 'GoogleDoc/']
   opf_files = None
   found_location = None
@@ -20,7 +19,7 @@ def get_package_opf(foldername: str):
       pass
   
   if not found_location:
-    print_and_flush("ERROR: No package.opf found in {}".format(foldername))
+    logger.print_and_flush("ERROR: No package.opf found in {}".format(foldername))
     return False
 
   with open('././public/uploads/{}/{}/package.opf'.format(foldername, found_location), 'r', encoding='utf8') as f:
