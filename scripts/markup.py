@@ -19,7 +19,7 @@ def write_to_soup(p, sentences, n_suffix, z_fill_len, soup):
   # Valid URL characters A-Z, a-z, 0-9, -, ., _, ~, :, /, ?, #, [, ], @, !, $, &, ', (, ), *, +, ,, ;, %, and =.
   contains_links = re.findall(r'(<a href\=\"[\w\d\W]+\">[\w\d\W]+</a>)', sentences)
   # Generate a list of sentences using regex string
-  sentences = re.split(r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)', sentences)
+  sentences = re.split(r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)', sentences)
   # Remove all empty elements in array
   sentences = list(filter(None, sentences))
   # ! print(sentences)
