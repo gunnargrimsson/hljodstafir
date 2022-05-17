@@ -1,3 +1,4 @@
+from datetime import datetime
 from aeneas.executetask import ExecuteTask
 from aeneas.task import Task
 from scripts.logger import Logger
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         language_code = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
         foldername = sys.argv[1]
         finalname = check_epub_exists(foldername)
-        logger = Logger('./public/logs/{}.log'.format(finalname))
+        logger = Logger('./public/logs/{}-{}.log'.format(finalname, datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
         logger.print_and_flush("Processing: {}".format(finalname))
         logger.print_and_flush("Language: {}".format(
             languages[language_code.upper()]))

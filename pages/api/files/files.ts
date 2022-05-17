@@ -3,7 +3,8 @@ import path from 'path';
 
 const handler = async (req: any, res: any) => {
 	const files = await getFiles();
-	res.status(200).json({ files: files.props.mapFiles });
+	const logs = await getLogs();
+	res.status(200).json({ files: files.mapFiles, logs: logs.mapLogs });
 };
 
 export const getFiles = async () => {
@@ -24,7 +25,28 @@ export const getFiles = async () => {
 			url: `output/${filename}`
 		}
 	});
-	return { props: { mapFiles } };
+	return { mapFiles };
+};
+
+export const getLogs = async () => {
+	const fileLoc = path.join('public', 'logs');
+	const files = fs.readdirSync(fileLoc);
+	const mapLogs = files.sort((a, b) => {
+		// get date from file property
+		const fileA = fs.statSync(path.join(fileLoc, a));
+		const fileB = fs.statSync(path.join(fileLoc, b));
+		return fileB.birthtime.getTime() - fileA.birthtime.getTime();
+	}).map((filename) => {
+		const file = fs.statSync(path.join(fileLoc, filename));
+		return {
+			name: filename,
+			date: file.birthtime.toLocaleString(),
+			size: file.size,
+			sizeInMB: (file.size/(1024**2)).toFixed(2) + ' MB',
+			url: `logs/${filename}`
+		}
+	});
+	return { mapLogs };
 };
 
 export default handler;

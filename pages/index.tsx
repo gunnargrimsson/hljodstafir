@@ -12,6 +12,7 @@ import { io, Socket } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
 import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
+import { getLogs } from './api/files/files';
 
 interface clientExtendedSocket extends Socket {
 	sessionID?: string;
@@ -36,19 +37,22 @@ interface IFile {
 interface IFetchProps {
 	data: {
 		files: IFile[];
+		logs: IFile[];
 	}
 }
 
-const IndexPage = ({ mapFiles }) => {
+const IndexPage = ({ mapFiles, mapLogs }) => {
 	const router = useRouter();
 	const redirected = router.query.redirected;
 	const [uploaded, setUploaded] = useState<boolean>(false);
 	const [error, setError] = useState<string>(null);
 	const [uploadMessage, setUploadMessage] = useState<string>(null);
 	const [files, setFiles] = useState<IFile[]>(mapFiles);
+	const [logs, setLogs] = useState<IFile[]>(mapLogs);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
 	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
 	const [connected, setConnected] = useState<boolean>(false);
+	const [showing, setShowing] = useState<string>('files');
 
 	const connectUser = async () => {
 		if (!connected) {
@@ -65,19 +69,25 @@ const IndexPage = ({ mapFiles }) => {
 		}
 	};
 
+	const getFiles = async () => {
+		const fetchFiles: IFetchProps = await axios.get('http://localhost:3000/api/files');
+		if (fetchFiles?.data) {
+			setFiles(fetchFiles.data.files);
+			setLogs(fetchFiles.data.logs);
+		}
+	}
+
 	useEffect(() => {
 		connectUser();
 		socket.on('ascanius-done', async (message: socketMessage) => {
 			setMessages((messages) => [...messages, message]);
-			const fetchFiles: IFetchProps = await axios.get('http://localhost:3000/api/files');
-			if (fetchFiles?.data?.files) {
-				setFiles(fetchFiles.data.files);
-			}
+			getFiles();
 		});
 		socket.on('ascanius-error', (message: socketMessage) => {
 			setUploaded(false);
 			setError(message.message);
 			setMessages((messages) => [...messages, message]);
+			getFiles();
 		});
 		socket.on('ascanius-relay', (message: socketMessage) => {
 			setMessages((messages) => [...messages, message]);
@@ -132,6 +142,10 @@ const IndexPage = ({ mapFiles }) => {
 		}
 	};
 
+	const onShowClick = (show: string) => {
+		setShowing(show);
+	}
+
 	return (
 		<div className='flex h-screen flex-col'>
 			<div className='w-full px-5 py-10'>
@@ -163,7 +177,17 @@ const IndexPage = ({ mapFiles }) => {
 					<Messages messages={messages} />
 				</div>
 				<div className='bg-gray-300 flex flex-col'>
-					{files.map((file: any, index: number) => (
+					<div className='flex justify-center my-2'>
+						<button onClick={() => onShowClick('files')} className={`px-4 py-2 ${showing === 'files' ? 'font-bold bg-white' : 'bg-gray-100'}`}>Files</button>
+						<button onClick={() => onShowClick('logs')} className={`px-4 py-2 ${showing === 'logs' ? 'font-bold bg-white' : 'bg-gray-100'}`}>Logs</button>
+					</div>
+					{showing === 'files' && files && files.map((file: any, index: number) => (
+						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
+							<span className='mr-2 font-semibold'>{index + 1}</span>
+							<Link href={'/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
+						</div>
+					))}
+					{showing === 'logs' && logs && logs.map((file: any, index: number) => (
 						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
 							<span className='mr-2 font-semibold'>{index + 1}</span>
 							<Link href={'/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
@@ -176,7 +200,9 @@ const IndexPage = ({ mapFiles }) => {
 };
 
 export async function getServerSideProps() {
-	return getFiles();
+	const { mapFiles } = await getFiles();
+	const { mapLogs } = await getLogs();
+	return { props: { mapFiles, mapLogs } };
 }
 
 export default IndexPage;
