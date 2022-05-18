@@ -83,17 +83,17 @@ const port = process.env.PORT || 3000;
 			next();
 		});
 
-    io.on('connection', async (socket: extendedSocket) => {
+		io.on('connection', async (socket: extendedSocket) => {
 			await socket.join(socket.sessionID);
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
-      socket.on('ascanius', (folderName: string) => {
+			socket.on('ascanius', (folderName: string) => {
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
-        ascanius(folderName, socket.sessionID, io);
-      });
+				ascanius(folderName, socket.sessionID, io);
+			});
 
 			socket.on('disconnect', (data) => {
-        socket.emit('user-disconnect');
+				socket.emit('user-disconnect');
 				console.log('user disconnected');
 			});
 		});
