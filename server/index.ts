@@ -50,13 +50,13 @@ const port = process.env.PORT || 3000;
 			res.status(200);
 		});
 
-		app.get('/api/delete/:location/:file', async (req, res) => {
-			const file = req.params.file;
-			const location = req.params.location;
+		app.post('/api/delete', async (req, res) => {
+			const file = req.body.file;
 			try {
-				fs.unlinkSync(`./public/${location}/${file}`);
+				fs.unlinkSync(`./public/${file}`);
 				res.status(200).json({ success: true, message: 'File deleted' });
 			} catch (error) {
+				console.error('File not found');
 				res.status(500).json({ success: false, message: error.message });
 			}
 		});

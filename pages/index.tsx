@@ -54,7 +54,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	}
 
 	const deleteFile = async (file) => {
-		await axios.get('http://localhost:3000/api/delete/' + file).then(() => {
+		await axios.post('http://localhost:3000/api/delete/', { file }).then(() => {
 			getFiles();
 		}).catch(err => {
 			console.log(err);
