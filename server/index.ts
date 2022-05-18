@@ -50,6 +50,17 @@ const port = process.env.PORT || 3000;
 			res.status(200);
 		});
 
+		app.get('/api/delete/:location/:file', async (req, res) => {
+			const file = req.params.file;
+			const location = req.params.location;
+			try {
+				fs.unlinkSync(`./public/${location}/${file}`);
+				res.status(200).json({ success: true, message: 'File deleted' });
+			} catch (error) {
+				res.status(500).json({ success: false, message: error.message });
+			}
+		});
+
 		// temp session database
 		let sessionStore = {};
 

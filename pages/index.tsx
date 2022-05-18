@@ -53,6 +53,14 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 		}
 	}
 
+	const deleteFile = async (file) => {
+		await axios.get('http://localhost:3000/api/delete/' + file).then(() => {
+			getFiles();
+		}).catch(err => {
+			console.log(err);
+		});
+	}
+
 	useEffect(() => {
 		connectUser();
 		socket.on('ascanius-done', async (message: socketMessage) => {
@@ -158,13 +166,15 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 						<button onClick={() => onShowClick('logs')} className={`px-4 py-2 ${showing === 'logs' ? 'font-bold bg-white' : 'bg-gray-100'}`}>Logs</button>
 					</div>
 					{showing === 'files' && files && files.map((file: any, index: number) => (
-						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
+						<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
+							<button onClick={() => deleteFile(file.url)} className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'>Delete</button>
 							<span className='mr-2 font-semibold'>{index + 1}</span>
 							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
 						</div>
 					))}
 					{showing === 'logs' && logs && logs.map((file: any, index: number) => (
-						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
+						<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
+							<button onClick={() => deleteFile(file.url)} className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'>Delete</button>
 							<span className='mr-2 font-semibold'>{index + 1}</span>
 							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
 						</div>
