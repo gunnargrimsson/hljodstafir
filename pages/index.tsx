@@ -1,45 +1,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Router, { useRouter } from 'next/router';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { Notification } from '@mantine/core';
 import { Check, X } from 'tabler-icons-react';
 import { getFiles } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
 import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
 import { getLogs } from './api/files/files';
-
-interface clientExtendedSocket extends Socket {
-	sessionID?: string;
-	userID?: string;
-}
+import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
-
-interface clientInfo {
-	sessionID?: string;
-	userID?: string;
-}
-
-interface IFile {
-	name: string;
-	date: string;
-	size: number;
-	sizeInMB: string;
-	url: string;
-}
-
-interface IFetchProps {
-	data: {
-		files: IFile[];
-		logs: IFile[];
-	}
-}
 
 const IndexPage = ({ mapFiles, mapLogs }) => {
 	const router = useRouter();
