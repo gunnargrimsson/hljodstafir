@@ -42,6 +42,14 @@ const port = process.env.PORT || 3000;
 			res.status(200).json({ data: files });
 		});
 
+		// download file
+		app.get('/api/download/:location/:file', async (req, res) => {
+			const file = req.params.file;
+			const location = req.params.location;
+			res.download(`./public/${location}/${file}`);
+			res.status(200);
+		});
+
 		// temp session database
 		let sessionStore = {};
 

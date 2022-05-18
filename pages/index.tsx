@@ -160,13 +160,13 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 					{showing === 'files' && files && files.map((file: any, index: number) => (
 						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
 							<span className='mr-2 font-semibold'>{index + 1}</span>
-							<Link href={'/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
+							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
 						</div>
 					))}
 					{showing === 'logs' && logs && logs.map((file: any, index: number) => (
 						<div key={index} className='hover:bg-blue-400 px-8 py-1 cursor-pointer'>
 							<span className='mr-2 font-semibold'>{index + 1}</span>
-							<Link href={'/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
+							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
 						</div>
 					))}
 				</div>
