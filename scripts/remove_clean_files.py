@@ -2,7 +2,7 @@ import shutil
 from scripts.logger import Logger
 
 def remove_clean_files(foldername, location, logger: Logger):
-    # Remove clean files
+    """Removes the clean files from the uploads folder."""
     try:
         shutil.rmtree(
             "./public/uploads/{}/{}clean".format(foldername, location))

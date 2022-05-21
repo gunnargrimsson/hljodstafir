@@ -3,6 +3,7 @@ import shutil
 from scripts.logger import Logger
 
 def remove_files(foldername, logger: Logger):
+  """Removes the files in the uploads folder."""
   # Remove all uploaded/processing files in the folder
   try:
     shutil.rmtree("./public/uploads/{}".format(foldername))

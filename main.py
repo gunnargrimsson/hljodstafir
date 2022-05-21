@@ -1,9 +1,8 @@
 from datetime import datetime
-from aeneas.executetask import ExecuteTask
-from aeneas.task import Task
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
+from scripts.force_align import force_align
 from scripts.remove_clean_files import remove_clean_files
 from scripts.remove_files import remove_files
 from scripts.extract_epub import extract_epub
@@ -20,7 +19,8 @@ if __name__ == "__main__":
         language_code = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
         foldername = sys.argv[1]
         finalname = check_epub_exists(foldername)
-        logger = Logger('./public/logs/{}-{}.log'.format(finalname, datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
+        logger = Logger('./public/logs/{}-{}.log'.format(finalname,
+                        datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
         logger.print_and_flush("Processing: {}".format(finalname))
         logger.print_and_flush("Language: {}".format(
             languages[language_code.upper()]))
@@ -43,37 +43,20 @@ if __name__ == "__main__":
             logger.print_and_flush(
                 "WARNING: Number of mp3 files and number of segments do not match.", 0.1)
 
+        # Markup the text files before for sentence level highlighting
         markup(foldername, location, text_files, logger)
-        # ? generate_id(foldername)
+        # Create clean text files of everything except the text and markup for aeneas
         clean(foldername, location, text_files, logger)
-        # ? process
-
-        for i, mp3 in enumerate(audio_files):
-            # Setup config string & absolute file path for audio/text/syncfile
-            config_string = "task_language={}|is_text_type=unparsed|os_task_file_format=smil|os_task_file_smil_audio_ref={}|os_task_file_smil_page_ref={}".format(
-                language_code, mp3, text_files[i])
-            # Create Task
-            task = Task(config_string=config_string)
-            task.audio_file_path_absolute = "./public/uploads/{}/{}{}".format(
-                foldername, location, mp3)
-            task.text_file_path_absolute = "./public/uploads/{}/{}clean/{}".format(
-                foldername, location, text_files[i])
-            # Each smil file is named the expected smil_prefix + number with leading zeros (3 or 4)
-            task.sync_map_file_path_absolute = "./public/uploads/{}/{}{}.smil".format(
-                foldername, location, text_files[i].split('.')[0])
-
-            # stdout.flush forces the progress print to be relayed to the server in real time
-            logger.print_and_flush(
-                "Processing.. {}/{}".format(i+1, len(audio_files)))
-
-            # Execute Task to output path
-            ExecuteTask(task).execute()
-            task.output_sync_map_file()
-
+        # Aeneas force alignment of audio and text
+        force_align(audio_files, text_files, foldername, location, logger)
+        # Remove clean files after aeneas processes them
         remove_clean_files(foldername, location, logger)
+        # Zip the epub back up
         zip_epub(foldername, finalname, logger)
+        # Notifies the server that the process is complete
         logger.print_and_flush("DONE")
+        # Remove the extra files from the server
         remove_files(foldername, logger)
     except Exception as e:
-        logger.print_and_flush("ERROR: {}".format(e))
+        logger.print_and_flush("ERROR: {}".format(e)) 
         raise

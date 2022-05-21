@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from scripts.logger import Logger
 
 def clean(foldername, location, text_files, logger: Logger):
+    """Cleans the text files for aeneas to correctly force align text and audio."""
     # Encode each segment with xml so that non ascii characters won't get distorted
     encoding = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
