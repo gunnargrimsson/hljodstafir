@@ -62,7 +62,7 @@ def valid_id(css_id):
     return bool(pattern.match(str(css_id)))
 
 
-def markup(foldername: str, location: str, text_files: list, logger: Logger):
+def markup(foldername: str, location: str, text_files: list, ignore_aside: bool, logger: Logger):
     """Adds span for each sentence it detects in the paragraph and outputs the file."""
     # Open each text file and mark it up
     current_text_file = None
@@ -81,8 +81,12 @@ def markup(foldername: str, location: str, text_files: list, logger: Logger):
 
             if not rerun:
                 # Get all the paragraphs with valid id
-                paragraphs = soup.find_all(re.compile(
-                    'h1|p|li|td|th|dt|dd'), id=valid_id)
+                if ignore_aside:
+                    paragraphs = [tag for tag in soup.find_all(re.compile(
+                        'h1|p|li|td|th|dt|dd'), id=valid_id) if tag.parent.name != 'aside']
+                else:
+                    paragraphs = soup.find_all(re.compile(
+                        'h1|p|li|td|th|dt|dd'), id=valid_id)
                 # To ensure that a long book with many paragraphs will always have an identifier that fits
                 z_fill_len = int(math.log10(
                     1 if len(paragraphs) <= 0 else len(paragraphs)) + 1) + 1

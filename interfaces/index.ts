@@ -21,3 +21,8 @@ export interface extendedSocket extends Socket {
 	sessionID: string;
 	userID: string;
 }
+
+export interface IOptions {
+	language: string;
+	ignoreAside: boolean; // boolean
+}

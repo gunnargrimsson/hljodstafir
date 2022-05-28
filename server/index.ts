@@ -7,7 +7,7 @@ import http from 'http';
 import { initIO } from './controllers/socket';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { extendedSocket } from '../interfaces';
+import { extendedSocket, IOptions } from '../interfaces';
 
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
@@ -87,9 +87,10 @@ const port = process.env.PORT || 3000;
 			await socket.join(socket.sessionID);
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
-			socket.on('ascanius', (folderName: string) => {
+			socket.on('ascanius', (folderName: string, options: IOptions) => {
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
-				ascanius(folderName, socket.sessionID, io);
+				console.log(options);
+				ascanius(folderName, socket.sessionID, io, options);
 			});
 
 			socket.on('disconnect', (data) => {

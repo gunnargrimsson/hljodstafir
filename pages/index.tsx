@@ -112,7 +112,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 			setUploaded(true);
 			setError(null);
 			try {
-				socket.emit('ascanius', res.data.data[0].split('.')[0]);
+				socket.emit('ascanius', res.data.data[0].split('.')[0], { language: 'isl', ignoreAside: true });
 			} catch (error) {
 				console.error(error);
 				setUploaded(false);

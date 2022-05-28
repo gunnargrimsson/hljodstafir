@@ -14,16 +14,21 @@ from scripts.aeneas_languages import LANGUAGE_CODE_TO_HUMAN as languages
 import sys
 
 if __name__ == "__main__":
+    check_if_folders_exists()
+    language = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
+    ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
+    foldername = sys.argv[1]
+    finalname = check_epub_exists(foldername)
+    logger = Logger('./public/logs/{}-{}.log'.format(finalname,
+                    datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
     try:
-        check_if_folders_exists()
-        language_code = sys.argv[3] if len(sys.argv) >= 3 else 'isl'
-        foldername = sys.argv[1]
-        finalname = check_epub_exists(foldername)
-        logger = Logger('./public/logs/{}-{}.log'.format(finalname,
-                        datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
         logger.print_and_flush("Processing: {}".format(finalname))
+        language_code = language.upper()
         logger.print_and_flush("Language: {}".format(
             languages[language_code.upper()]))
+        if language_code not in languages:
+            logger.print_and_flush('WARNING: Language not supported')
+        logger.print_and_flush("Ignore Aside/Image Text: {}".format(ignore_aside))
         extract_epub(foldername)
 
         package_opf, location = get_package_opf(foldername, logger)
@@ -44,11 +49,11 @@ if __name__ == "__main__":
                 "WARNING: Number of mp3 files and number of segments do not match.", 0.1)
 
         # Markup the text files before for sentence level highlighting
-        markup(foldername, location, text_files, logger)
+        markup(foldername, location, text_files, ignore_aside, logger)
         # Create clean text files of everything except the text and markup for aeneas
         clean(foldername, location, text_files, logger)
         # Aeneas force alignment of audio and text
-        force_align(audio_files, text_files, foldername, location, logger)
+        force_align(audio_files, text_files, language_code, foldername, location, logger)
         # Remove clean files after aeneas processes them
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up
