@@ -1,5 +1,7 @@
+import os
 from aeneas.executetask import ExecuteTask
 from aeneas.task import Task
+from aeneas.logger import Logger as AeneasLogger
 from scripts.logger import Logger
 
 def force_align(audio_files: list, text_files: list, language_code: str, foldername: str, location: str, logger: Logger):
@@ -22,6 +24,19 @@ def force_align(audio_files: list, text_files: list, language_code: str, foldern
         logger.print_and_flush(
             "Processing.. {}/{}".format(i+1, len(audio_files)))
 
+        aeneasLogger = AeneasLogger()
+
         # Execute Task to output path
-        ExecuteTask(task).execute()
+        ExecuteTask(task, logger=aeneasLogger).execute()
         task.output_sync_map_file()
+        # Write Verbose Logs to temp file
+        task.logger.write('./public/uploads/temp/logs/{}.log'.format(text_files[i].split('.')[0]))
+        # Append temp log to main log file
+        with open('./public/uploads/temp/logs/{}.log'.format(text_files[i].split('.')[0]), 'r', encoding='utf8') as temp_log_file:
+            with open(logger.log_file, 'a', encoding='utf8') as log_file:
+                log_file.write('Verbose DEBUG Logs for {}:\n'.format(text_files[i]))
+                for line in temp_log_file:
+                    log_file.write('\t' + line)
+                log_file.write('\n\n')
+        # Delete temp log file
+        os.remove('./public/uploads/temp/logs/{}.log'.format(text_files[i].split('.')[0]))
