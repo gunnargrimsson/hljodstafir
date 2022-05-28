@@ -89,7 +89,6 @@ const port = process.env.PORT || 3000;
 
 			socket.on('ascanius', (folderName: string, options: IOptions) => {
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
-				console.log(options);
 				ascanius(folderName, socket.sessionID, io, options);
 			});
 

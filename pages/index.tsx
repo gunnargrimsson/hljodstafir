@@ -14,6 +14,7 @@ import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
 import { getLogs } from './api/files/files';
 import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
+import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
 
@@ -29,6 +30,8 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
 	const [connected, setConnected] = useState<boolean>(false);
 	const [showing, setShowing] = useState<string>('files');
+	const [languageCode, setLanguageCode] = useState<string>('isl');
+	const [ignoreAside, setIgnoreAside] = useState<boolean>(true);
 
 	const connectUser = async () => {
 		if (!connected) {
@@ -112,7 +115,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 			setUploaded(true);
 			setError(null);
 			try {
-				socket.emit('ascanius', res.data.data[0].split('.')[0], { language: 'isl', ignoreAside: true });
+				socket.emit('ascanius', res.data.data[0].split('.')[0], { language: languageCode, ignoreAside: ignoreAside });
 			} catch (error) {
 				console.error(error);
 				setUploaded(false);
@@ -150,6 +153,17 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 					{messages.length === 0 && (
 						<div className='px-5 my-10 py-4 bg-white rounded-sm flex flex-col'>
 							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
+							<div className='w-full flex flex-col py-4 gap-2'>
+							<select className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2' onChange={(e) => setLanguageCode(e.target.value)} id='selectLanguage'>
+									<option value='isl'>Icelandic</option>
+									<option value='dan'>Danish</option>
+									<option value='eng'>English</option>
+								</select>
+								<div className='flex gap-2 place-items-center place-content-center rounded-sm'>
+									<input className='w-4 h-4' checked={ignoreAside} onChange={() => setIgnoreAside(!ignoreAside)} type='checkbox' id='ignoreAside' />
+									<label className='font-medium' htmlFor='ignoreAside'>Ignore Image Text</label>
+								</div>
+							</div>
 							<FileInputButton
 								label='Upload EPUB'
 								uploadFileName='files'

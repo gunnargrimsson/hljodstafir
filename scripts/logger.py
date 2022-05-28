@@ -11,8 +11,8 @@ class Logger:
         with open(self.log_file, 'a') as f:
             f.write('[{}] {}'.format(datetime.now() ,message + '\n'))
 
-    def print_and_flush(self, string: str, sleep: float=0):
-        """Prints a string and flushes the output buffer."""
+    def print_and_flush(self, string: str, sleep: float=0.1):
+        """Prints a string and flushes the output buffer. Default sleeps for 0.1 seconds."""
         if (sleep > 0):
             time.sleep(sleep)
         print(string)

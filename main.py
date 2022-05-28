@@ -15,7 +15,7 @@ import sys
 
 if __name__ == "__main__":
     check_if_folders_exists()
-    language = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
+    language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     foldername = sys.argv[1]
     finalname = check_epub_exists(foldername)
@@ -23,10 +23,9 @@ if __name__ == "__main__":
                     datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
     try:
         logger.print_and_flush("Processing: {}".format(finalname))
-        language_code = language.upper()
         logger.print_and_flush("Language: {}".format(
             languages[language_code.upper()]))
-        if language_code not in languages:
+        if language_code.upper() not in languages:
             logger.print_and_flush('WARNING: Language not supported')
         logger.print_and_flush("Ignore Aside/Image Text: {}".format(ignore_aside))
         extract_epub(foldername)
