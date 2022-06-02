@@ -8,6 +8,7 @@ import { initIO } from './controllers/socket';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { extendedSocket, IOptions } from '../interfaces';
+import dayjs from 'dayjs';
 
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
@@ -16,6 +17,7 @@ const port = process.env.PORT || 3000;
 
 (async () => {
 	try {
+		const timeRegex = /[\.\-\:]/g;
 		await nextApp.prepare();
 		const app = express();
 		app.use(express.json({ limit: '1gb' }));
@@ -28,7 +30,7 @@ const port = process.env.PORT || 3000;
 				destination: './public/uploads',
 				filename: (req, file, cb) => {
 					console.log(file);
-					cb(null, `${file.originalname}`);
+					cb(null, `${dayjs().toISOString().replaceAll(timeRegex, '_')}_remove-timestamp_${file.originalname}`);
 				},
 			}),
 			limits: { fileSize: 1024 ** 3 },

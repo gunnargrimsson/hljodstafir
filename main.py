@@ -18,7 +18,7 @@ if __name__ == "__main__":
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     foldername = sys.argv[1]
-    finalname = check_epub_exists(foldername)
+    finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
     logger = Logger('./public/logs/{}-{}.log'.format(finalname,
                     datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
     try:
@@ -51,6 +51,7 @@ if __name__ == "__main__":
         markup(foldername, location, text_files, ignore_aside, logger)
         # Create clean text files of everything except the text and markup for aeneas
         clean(foldername, location, text_files, logger)
+        # TODO: Remove all audio files and text files if "clean file" is "empty" of tags and warn the user
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code, foldername, location, logger)
         # Remove clean files after aeneas processes them
@@ -60,7 +61,8 @@ if __name__ == "__main__":
         # Notifies the server that the process is complete
         logger.print_and_flush("DONE")
         # Remove the extra files from the server
-        remove_files(foldername, logger)
+        remove_files(foldername, finalname, logger)
     except Exception as e:
+        remove_files(foldername, finalname, logger)
         logger.print_and_flush("ERROR: {}".format(e)) 
         raise
