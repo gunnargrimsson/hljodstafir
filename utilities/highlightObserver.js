@@ -9,20 +9,24 @@ let lastParentNode = null;
 /*
   For each mutation (add, remove) from class list
   we can check whether or not to remove/add the media overlay class
-  from the parent element 
+  from the parent element
 */
-
 const mutationCallback = (mutationList, observer) => {
 	mutationList.forEach((mutation) => {
 		if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+			const parentNode = mutation.target.parentNode;
 			if (mutation.target.classList.contains('-epub-media-overlay-active')) {
-				const parentNode = mutation.target.parentNode;
-				if (parentNode !== lastParentNode) {
-					if (lastParentNode !== null && lastParentNode.classList.contains('-epub-media-overlay-active-parent')) {
-						lastParentNode.classList.remove('-epub-media-overlay-active-parent');
-					}
-					parentNode.classList.add('-epub-media-overlay-active-parent');
-					lastParentNode = parentNode;
+				if (lastParentNode !== null) {
+					lastParentNode.classList.remove('-epub-media-overlay-active-parent');
+				}
+				lastParentNode = parentNode;
+				if (parentNode.children.length <= 1) {
+					return;
+				}
+				parentNode.classList.add('-epub-media-overlay-active-parent');
+			} else {
+				if (parentNode !== null) {
+					parentNode.classList.remove('-epub-media-overlay-active-parent');
 				}
 			}
 		}
