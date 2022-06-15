@@ -1,4 +1,5 @@
 from datetime import datetime
+from scripts.adjust_smil_files import adjust_smil_files
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
@@ -17,6 +18,7 @@ if __name__ == "__main__":
     check_if_folders_exists()
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
+    adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
     foldername = sys.argv[1]
     finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
     logger = Logger('./public/logs/{}-{}.log'.format(finalname,
@@ -27,7 +29,8 @@ if __name__ == "__main__":
             languages[language_code.upper()]))
         if language_code.upper() not in languages:
             logger.print_and_flush('WARNING: Language not supported')
-        logger.print_and_flush("Ignore Aside/Image Text: {}".format(ignore_aside))
+        logger.print_and_flush(
+            "Ignore Aside/Image Text: {}".format(ignore_aside))
         extract_epub(foldername)
 
         package_opf, location = get_package_opf(foldername, logger)
@@ -38,6 +41,8 @@ if __name__ == "__main__":
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
+        smil_files = get_files_from_package_opf(
+            package_opf, 'application/smil+xml')
 
         logger.print_and_flush("Audio Files: {}".format(len(audio_files)))
         logger.print_and_flush("Text Files: {}".format(len(text_files)), 0.1)
@@ -53,16 +58,20 @@ if __name__ == "__main__":
         clean(foldername, location, text_files, logger)
         # TODO: Remove all audio files and text files if "clean file" is "empty" of tags and warn the user
         # Aeneas force alignment of audio and text
-        force_align(audio_files, text_files, language_code, foldername, location, logger)
+        force_align(audio_files, text_files, language_code,
+                    foldername, location, logger)
+        if (adjustment > 0):
+            adjust_smil_files(smil_files, foldername,
+							location, logger, adjustment)
         # Remove clean files after aeneas processes them
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up
         zip_epub(foldername, finalname, logger)
         # Notifies the server that the process is complete
-        logger.print_and_flush("DONE")
+        logger.print_and_flush("DONE", 1)
         # Remove the extra files from the server
         remove_files(foldername, finalname, logger)
     except Exception as e:
         remove_files(foldername, finalname, logger)
-        logger.print_and_flush("ERROR: {}".format(e)) 
+        logger.print_and_flush("ERROR: {}".format(e))
         raise

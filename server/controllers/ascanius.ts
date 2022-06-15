@@ -4,10 +4,12 @@ import { IOptions, socketMessage } from '../../interfaces';
 
 const ascanius = (folderName: string, userID: string, io: Server, options: IOptions) => {
 	try {
+		console.log(options);
 		const stringOptions = {
-			ignoreAside: options.ignoreAside.toString()
+			ignoreAside: options.ignoreAside.toString(),
+			adjustments: options.adjustment.toString()
 		};
-		const process = spawn('python', ['main.py', folderName, options.language, stringOptions.ignoreAside]);
+		const process = spawn('python', ['main.py', folderName, options.language, stringOptions.ignoreAside, stringOptions.adjustments]);
 		process.stdout.on('data', (data: string) => {
 			const hasError = data.toString().toLowerCase().includes('error');
 			const done = data.toString().toLowerCase().includes('done');
@@ -33,6 +35,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 			io.to(userID).emit('ascanius-error', message);
 		});
 	} catch (error) {
+		console.log('We can delete the file here as well?');
 		console.error(error);
 	}
 };

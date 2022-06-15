@@ -32,6 +32,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
 	const [ignoreAside, setIgnoreAside] = useState<boolean>(true);
+	const [adjustment, setAdjustment] = useState<number>(100);
 
 	const connectUser = async () => {
 		if (!connected) {
@@ -54,15 +55,18 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 			setFiles(fetchFiles.data.files);
 			setLogs(fetchFiles.data.logs);
 		}
-	}
+	};
 
 	const deleteFile = async (file) => {
-		await axios.post('/api/delete/', { file }).then(() => {
-			getFiles();
-		}).catch(err => {
-			console.log(err);
-		});
-	}
+		await axios
+			.post('/api/delete/', { file })
+			.then(() => {
+				getFiles();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	};
 
 	useEffect(() => {
 		connectUser();
@@ -115,7 +119,11 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 			setUploaded(true);
 			setError(null);
 			try {
-				socket.emit('ascanius', res.data.data[0].split('.')[0], { language: languageCode, ignoreAside: ignoreAside });
+				socket.emit('ascanius', res.data.data[0].split('.')[0], {
+					language: languageCode,
+					ignoreAside: ignoreAside,
+					adjustment: adjustment,
+				});
 			} catch (error) {
 				console.error(error);
 				setUploaded(false);
@@ -131,7 +139,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 
 	const onShowClick = (show: string) => {
 		setShowing(show);
-	}
+	};
 
 	return (
 		<div className='flex h-screen flex-col'>
@@ -154,14 +162,41 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 						<div className='px-5 my-10 py-4 bg-white rounded-sm flex flex-col'>
 							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
 							<div className='w-full flex flex-col py-4 gap-2'>
-							<select className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2' onChange={(e) => setLanguageCode(e.target.value)} id='selectLanguage'>
+								<label className='font-medium' htmlFor='selectLanguage'>
+									Select Language
+								</label>
+								<select
+									className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2'
+									onChange={(e) => setLanguageCode(e.target.value)}
+									id='selectLanguage'
+								>
 									<option value='isl'>Icelandic</option>
 									<option value='dan'>Danish</option>
 									<option value='eng'>English</option>
 								</select>
-								<div className='flex gap-2 place-items-center place-content-center rounded-sm'>
-									<input className='w-4 h-4' checked={ignoreAside} onChange={() => setIgnoreAside(!ignoreAside)} type='checkbox' id='ignoreAside' />
-									<label className='font-medium' htmlFor='ignoreAside'>Ignore Image Text</label>
+								<div className='flex flex-col rounded-sm'>
+									<label className='font-medium' htmlFor='adjustment'>
+										Adjust highlighting forward by
+									</label>
+									<input
+										className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2'
+										onChange={(e) => setAdjustment(parseInt(e.target.value))}
+										defaultValue={adjustment}
+										type='number'
+										id='adjustment'
+									/>
+								</div>
+								<div className='flex gap-2 place-items-center rounded-sm'>
+									<input
+										className='w-4 h-4'
+										checked={ignoreAside}
+										onChange={() => setIgnoreAside(!ignoreAside)}
+										type='checkbox'
+										id='ignoreAside'
+									/>
+									<label className='font-medium' htmlFor='ignoreAside'>
+										Ignore Image Text
+									</label>
 								</div>
 							</div>
 							<FileInputButton
@@ -176,23 +211,47 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 				</div>
 				<div className='bg-gray-300 flex flex-col'>
 					<div className='flex justify-center my-2'>
-						<button onClick={() => onShowClick('files')} className={`px-4 py-2 ${showing === 'files' ? 'font-bold bg-white' : 'bg-gray-100'}`}>Files</button>
-						<button onClick={() => onShowClick('logs')} className={`px-4 py-2 ${showing === 'logs' ? 'font-bold bg-white' : 'bg-gray-100'}`}>Logs</button>
+						<button
+							onClick={() => onShowClick('files')}
+							className={`px-4 py-2 ${showing === 'files' ? 'font-bold bg-white' : 'bg-gray-100'}`}
+						>
+							Files
+						</button>
+						<button
+							onClick={() => onShowClick('logs')}
+							className={`px-4 py-2 ${showing === 'logs' ? 'font-bold bg-white' : 'bg-gray-100'}`}
+						>
+							Logs
+						</button>
 					</div>
-					{showing === 'files' && files && files.map((file: any, index: number) => (
-						<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
-							<button onClick={() => deleteFile(file.url)} className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'>Delete</button>
-							<span className='mr-2 font-semibold'>{index + 1}</span>
-							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
-						</div>
-					))}
-					{showing === 'logs' && logs && logs.map((file: any, index: number) => (
-						<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
-							<button onClick={() => deleteFile(file.url)} className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'>Delete</button>
-							<span className='mr-2 font-semibold'>{index + 1}</span>
-							<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
-						</div>
-					))}
+					{showing === 'files' &&
+						files &&
+						files.map((file: any, index: number) => (
+							<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
+								<button
+									onClick={() => deleteFile(file.url)}
+									className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'
+								>
+									Delete
+								</button>
+								<span className='mr-2 font-semibold'>{index + 1}</span>
+								<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
+							</div>
+						))}
+					{showing === 'logs' &&
+						logs &&
+						logs.map((file: any, index: number) => (
+							<div key={index} className='hover:bg-blue-400 px-8 py-2 cursor-pointer relative'>
+								<button
+									onClick={() => deleteFile(file.url)}
+									className='px-2 py-1 bg-red-300 font-bold absolute right-8 top-1'
+								>
+									Delete
+								</button>
+								<span className='mr-2 font-semibold'>{index + 1}</span>
+								<Link href={'/api/download/' + file.url}>{file.name + ' - ' + file.date + ' - ' + file.sizeInMB}</Link>
+							</div>
+						))}
 				</div>
 			</div>
 		</div>

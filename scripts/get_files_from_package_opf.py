@@ -17,6 +17,9 @@ def get_files_from_package_opf(package_opf: str, file_type: str):
     if (file_type == 'application/xhtml+xml'):
         package_manifest_files = [item.get('href') for item in package_manifest_items if item.get(
             'media-type') == file_type and 'smil' in str(item) and str(item.get('href')).lower() not in ignore_file_list]
+    if (file_type == 'application/smil+xml'):
+        package_manifest_files = [item.get('href') for item in package_manifest_items if item.get(
+            'media-type') == file_type and str(item.get('href')).lower() not in ignore_file_list]
     else:
         package_manifest_files = [item.get('href') for item in package_manifest_items if item.get(
             'media-type') == file_type and str(item.get('href')).lower() not in ignore_file_list]
