@@ -1,5 +1,7 @@
 from datetime import datetime
+from mutagen.mp3 import MP3
 from scripts.adjust_smil_files import adjust_smil_files
+from scripts.check_audio_length import check_audio_length
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
@@ -16,6 +18,7 @@ import sys
 
 if __name__ == "__main__":
     check_if_folders_exists()
+    mp3_max_minutes_length = 30
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
@@ -39,6 +42,9 @@ if __name__ == "__main__":
                 "Could not find package.opf, Not a valid EPUB File.\nPlease fix, refresh and try again.")
 
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
+        # check if audio files lengths are within allowed range
+        check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
+
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
         smil_files = get_files_from_package_opf(
