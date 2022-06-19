@@ -1,5 +1,4 @@
 from datetime import datetime
-from mutagen.mp3 import MP3
 from scripts.adjust_smil_files import adjust_smil_files
 from scripts.check_audio_length import check_audio_length
 from scripts.logger import Logger
