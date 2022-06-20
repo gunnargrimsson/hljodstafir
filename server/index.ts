@@ -14,6 +14,7 @@ const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 const port = process.env.PORT || 3000;
+const ignoreUploadFolderNames = ['temp'];
 
 (async () => {
 	try {
@@ -40,8 +41,16 @@ const port = process.env.PORT || 3000;
 
 		app.post('/api/upload', uploadFiles, async (req, res) => {
 			const filenames = fs.readdirSync('./public/uploads');
-			const files = filenames.map((file) => file);
-			console.log(files);
+			// ignore upload folder names
+			const filteredFilenames = filenames.filter((filename) => !ignoreUploadFolderNames.includes(filename));
+			// sort files by upload time
+			const sortedFilenames = filteredFilenames.sort((a, b) => {
+				const aTime = dayjs(a.split('_remove-timestamp_')[0]);
+				const bTime = dayjs(b.split('_remove-timestamp_')[0]);
+				return aTime.isAfter(bTime) ? 1 : -1;
+			});
+			const files = sortedFilenames.map((file) => file);
+			// sends back files in sorted order to client so clients file is on top of the list
 			res.status(200).json({ data: files });
 		});
 
