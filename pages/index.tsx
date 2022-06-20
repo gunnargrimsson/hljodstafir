@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -14,7 +13,7 @@ import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
 import { getLogs } from './api/files/files';
 import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
-import Languages from '../constants/languages.json';
+// import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
 
