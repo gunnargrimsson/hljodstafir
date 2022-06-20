@@ -41,6 +41,7 @@ const port = process.env.PORT || 3000;
 		app.post('/api/upload', uploadFiles, async (req, res) => {
 			const filenames = fs.readdirSync('./public/uploads');
 			const files = filenames.map((file) => file);
+			console.log(files);
 			res.status(200).json({ data: files });
 		});
 
@@ -91,6 +92,7 @@ const port = process.env.PORT || 3000;
 
 			socket.on('ascanius', (folderName: string, options: IOptions) => {
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
+				console.log("Running ascanius:", folderName);
 				ascanius(folderName, socket.sessionID, io, options);
 			});
 
