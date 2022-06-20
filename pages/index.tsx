@@ -27,6 +27,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [files, setFiles] = useState<IFile[]>(mapFiles);
 	const [logs, setLogs] = useState<IFile[]>(mapLogs);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
+	const [canCloseMessages, setCanCloseMessages] = useState<boolean>(false);
 	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
 	const [connected, setConnected] = useState<boolean>(false);
 	const [showing, setShowing] = useState<string>('files');
@@ -71,10 +72,12 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	useEffect(() => {
 		connectUser();
 		socket.on('ascanius-done', async (message: socketMessage) => {
+			setCanCloseMessages(true);
 			setMessages((messages) => [...messages, message]);
 			getFiles();
 		});
 		socket.on('ascanius-error', (message: socketMessage) => {
+			setCanCloseMessages(true);
 			setUploaded(false);
 			setError(message.message);
 			setMessages((messages) => [...messages, message]);
@@ -114,6 +117,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 		};
 
 		const res = await axios.post('/api/upload', formData, config);
+		console.log(res);
 
 		if (res.status === 200) {
 			setUploaded(true);
@@ -141,10 +145,29 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 		setShowing(show);
 	};
 
+	const handleAdjustmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		// only allow values between 0 and 10000
+		const value = parseInt(e.target.value, 10);
+		if (value >= 10000) {
+			setAdjustment(10000);
+		}
+		if (value >= 0 && value <= 10000) {
+			setAdjustment(value);
+		}
+		if (isNaN(value)) {
+			setAdjustment(0);
+		}
+	}
+
+	const handleCloseFeed = () => {
+		setCanCloseMessages(false);
+		setMessages([]);
+	}
+
 	return (
 		<div className='flex h-screen flex-col'>
 			<div className='w-full px-5 py-10'>
-				<h1 className='text-2xl font-semibold'>Hljóðstafir</h1>
+				<Link href={'/'}><div className='text-2xl font-semibold cursor-pointer select-none'>🎼 Hljóðstafir</div></Link>
 			</div>
 			{uploaded && (
 				<Notification onClose={() => setUploaded(false)} icon={<Check size={18} />} color='teal' title='Upload Status'>
@@ -174,14 +197,14 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 									<option value='dan'>Danish</option>
 									<option value='eng'>English</option>
 								</select>
-								<div className='flex flex-col rounded-sm'>
+								<div className='flex flex-col rounded-sm relative milliseconds'>
 									<label className='font-medium' htmlFor='adjustment'>
-										Adjust highlighting forward by
+										Adjust highlighting
 									</label>
 									<input
-										className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2'
-										onChange={(e) => setAdjustment(parseInt(e.target.value))}
-										defaultValue={adjustment}
+										className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
+										onChange={handleAdjustmentChange}
+										value={adjustment}
 										type='number'
 										id='adjustment'
 									/>
@@ -207,7 +230,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 							/>
 						</div>
 					)}
-					<Messages messages={messages} />
+					<Messages messages={messages} canCloseMessages={canCloseMessages} handleCloseFeed={handleCloseFeed} />
 				</div>
 				<div className='bg-gray-300 flex flex-col'>
 					<div className='flex justify-center my-2'>
