@@ -8,4 +8,7 @@ def check_audio_length(mp3_max_minutes_length: int, foldername: str, location: s
         audio_info = MP3(audio_file_loc).info
         if audio_info.length > mp3_max_minutes_length * 60:
             raise Exception(
-                "Audio file {} is longer than {} minutes.\nPlease fix, refresh and try again.".format(audio_file, mp3_max_minutes_length))
+                """
+                    Audio file {} is {} minutes long, max allowed length is {} minutes.\n
+                    Please fix, refresh and try again.
+                """ .format(audio_file, audio_info.length / 60, mp3_max_minutes_length))
