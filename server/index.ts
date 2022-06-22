@@ -31,7 +31,7 @@ const ignoreUploadFolderNames = ['temp'];
 				destination: './public/uploads',
 				filename: (req, file, cb) => {
 					console.log(file);
-					cb(null, `${dayjs().toISOString().replace(timeRegex, '_')}_remove-timestamp_${file.originalname}`);
+					cb(null, `${dayjs().toISOString().replaceAll(timeRegex, '_')}_remove-timestamp_${file.originalname}`);
 				},
 			}),
 			limits: { fileSize: 1024 ** 3 },
