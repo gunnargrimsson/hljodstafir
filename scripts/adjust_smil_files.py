@@ -113,5 +113,6 @@ def adjust_smil_files(smil_files: list, foldername: str, location: str, logger: 
 def remove_extra_colon(soup: BeautifulSoup, find_tag: str):
     # remove colon from top of file
     tag = soup.find(find_tag)
-    tag.attrs['xmlns'] = tag.attrs['xmlns:']
-    del tag.attrs['xmlns:']
+    if (tag):
+        tag.attrs['xmlns'] = tag.attrs['xmlns:']
+        del tag.attrs['xmlns:']
