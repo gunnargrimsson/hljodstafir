@@ -1,6 +1,7 @@
 from datetime import datetime
 from scripts.adjust_smil_files import adjust_smil_files
 from scripts.check_audio_length import check_audio_length
+from scripts.check_nav import check_nav
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
@@ -43,7 +44,8 @@ if __name__ == "__main__":
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
         # check if audio files lengths are within allowed range
         check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
-
+        # check if nav.xhtml exists and if its empty or not
+        check_nav(package_opf)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
         smil_files = get_files_from_package_opf(
