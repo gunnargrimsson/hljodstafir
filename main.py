@@ -44,7 +44,7 @@ if __name__ == "__main__":
         # check if audio files lengths are within allowed range
         check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
-        check_toc_nav(package_opf)
+        check_toc_nav(package_opf, foldername, location)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
         smil_files = get_files_from_package_opf(

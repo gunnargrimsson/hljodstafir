@@ -31,7 +31,7 @@ def get_all_items_from_package_opf(package_opf: str):
     return package_manifest_items
 
 
-def check_toc_nav(package_opf: str):
+def check_toc_nav(package_opf: str, foldername: str, location: str):
     """
       Checks if the toc.xhtml and nav.xhtml files exist in the package.opf file.
       And whether they are empty or not.
@@ -42,7 +42,7 @@ def check_toc_nav(package_opf: str):
         'href').lower() in ignore_file_list]
     for toc_nav_file in toc_nav_files:
         if toc_nav_file == 'toc.xhtml':
-            toc_nav_file_content = get_file_content(toc_nav_file)
+            toc_nav_file_content = get_file_content(toc_nav_file, foldername, location)
             if len(toc_nav_file_content) == 0:
                 raise Exception(
                     """
@@ -51,7 +51,7 @@ def check_toc_nav(package_opf: str):
                     """
                 )
         if toc_nav_file == 'nav.xhtml':
-            toc_nav_file_content = get_file_content(toc_nav_file)
+            toc_nav_file_content = get_file_content(toc_nav_file, foldername, location)
             if len(toc_nav_file_content) == 0:
                 raise Exception(
                     """
@@ -61,10 +61,10 @@ def check_toc_nav(package_opf: str):
                 )
 
 
-def get_file_content(file_name: str):
+def get_file_content(file_name: str, foldername: str, location: str):
     """
       Returns the content of a file.
     """
-    with open(file_name, 'r') as file:
+    with open("././public/uploads/{}/{}/{}".format(foldername, location, file_name), 'r') as file:
         file_content = file.read()
     return file_content
