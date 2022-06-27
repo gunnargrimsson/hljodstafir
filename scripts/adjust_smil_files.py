@@ -46,6 +46,7 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
     """
         Adjusts the smil file based on some threshold that can be set by the user, defaults to 100ms.
     """
+    newClipEnd = '00:00:00.000'
     with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'r') as f:
         smil = f.read()
         # turn to soup
@@ -58,31 +59,36 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
             clipEnd = audio.get('clipEnd')
             if clipBegin and clipEnd:
                 # convert timestamp to number
-                clipBeginAsTime = datetime.strptime(
+                try:
+                    clipBeginAsTime = datetime.strptime(
                     clipBegin, '%H:%M:%S.%f')
-                clipEndAsTime = datetime.strptime(clipEnd, '%H:%M:%S.%f')
-                zeroAsTime = datetime.strptime(
-                    '00:00:00.000', '%H:%M:%S.%f')
-                if (clipBeginAsTime == zeroAsTime and index == 0):
-                    # only hurry the clipEnd 00:00:00.000
-                    newClipEndAsTime = clipEndAsTime - \
-                        timedelta(milliseconds=adjustment)
-                    newClipEnd = newClipEndAsTime.strftime('%H:%M:%S.%f')[
+                    clipEndAsTime = datetime.strptime(clipEnd, '%H:%M:%S.%f')
+                    zeroAsTime = datetime.strptime(
+                        '00:00:00.000', '%H:%M:%S.%f')
+                    if (clipBeginAsTime == zeroAsTime and index == 0):
+                        # only hurry the clipEnd 00:00:00.000
+                        newClipEndAsTime = clipEndAsTime - \
+                            timedelta(milliseconds=adjustment)
+                        newClipEnd = newClipEndAsTime.strftime('%H:%M:%S.%f')[
+                            :-3]
+                        audio.attrs['clipEnd'] = newClipEnd
+                        continue
+                    # move forward clipBegin and clipEnd by 100ms
+                    newClipBeginAsTime = (
+                        clipBeginAsTime - timedelta(milliseconds=adjustment)).time()
+                    newClipEndAsTime = (
+                        clipEndAsTime - timedelta(milliseconds=adjustment)).time()
+                    # convert back to string
+                    newClipBegin = newClipBeginAsTime.strftime('%H:%M:%S.%f')[
                         :-3]
+                    newClipEnd = newClipEndAsTime.strftime('%H:%M:%S.%f')[:-3]
+                    # set the new clipBegin and clipEnd attributes
+                    audio.attrs['clipBegin'] = newClipBegin
                     audio.attrs['clipEnd'] = newClipEnd
+                except Exception as e:
+                    logger.print_and_flush(
+                        'WARNING: adjusting smil file exception: {}'.format(e))
                     continue
-                # move forward clipBegin and clipEnd by 100ms
-                newClipBeginAsTime = (
-                    clipBeginAsTime - timedelta(milliseconds=adjustment)).time()
-                newClipEndAsTime = (
-                    clipEndAsTime - timedelta(milliseconds=adjustment)).time()
-                # convert back to string
-                newClipBegin = newClipBeginAsTime.strftime('%H:%M:%S.%f')[
-                    :-3]
-                newClipEnd = newClipEndAsTime.strftime('%H:%M:%S.%f')[:-3]
-                # set the new clipBegin and clipEnd attributes
-                audio.attrs['clipBegin'] = newClipBegin
-                audio.attrs['clipEnd'] = newClipEnd
 
         # remove colon from top of file
         remove_extra_colon(soup, 'smil')
@@ -91,8 +97,6 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
         # write the new smil file
         with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'w', encoding='utf8') as newf:
             newf.write(soup.decode('utf8'))
-            logger.print_and_flush(
-                'Adjusted highlighting for smil file: {} by {} ms'.format(smil_file, adjustment))
     return newClipEnd
 
 
@@ -108,6 +112,7 @@ def adjust_smil_files(smil_files: list, foldername: str, location: str, logger: 
         smil_file_end_durations.append(end_duration)
     adjust_package_opf_smil_durations(
         foldername, location, smil_file_end_durations)
+    logger.print_and_flush('Finished adjusting highlighting by {} ms.'.format(adjustment))
 
 
 def remove_extra_colon(soup: BeautifulSoup, find_tag: str):

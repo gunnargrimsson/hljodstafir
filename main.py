@@ -10,7 +10,7 @@ from scripts.remove_files import remove_files
 from scripts.extract_epub import extract_epub
 from scripts.zip_epub import check_epub_exists, zip_epub
 from scripts.get_package_opf import get_package_opf
-from scripts.get_files_from_package_opf import get_files_from_package_opf
+from scripts.get_files_from_package_opf import get_files_from_package_opf, check_toc_nav
 from scripts.check_folders import check_if_folders_exists
 from scripts.aeneas_languages import LANGUAGE_CODE_TO_HUMAN as languages
 import sys
@@ -43,7 +43,8 @@ if __name__ == "__main__":
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
         # check if audio files lengths are within allowed range
         check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
-
+        # check if nav.xhtml exists and if its empty or not
+        check_toc_nav(package_opf, foldername, location)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
         smil_files = get_files_from_package_opf(
@@ -72,11 +73,11 @@ if __name__ == "__main__":
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up
         zip_epub(foldername, finalname, logger)
+        # Remove the extra files from the server (Doesn't log any exceptions)
+        remove_files(foldername, finalname, logger, False)
         # Notifies the server that the process is complete
 		# Waits for extra 1 second to allow all other messages to clear
         logger.print_and_flush("DONE", 1)
-        # Remove the extra files from the server
-        remove_files(foldername, finalname, logger)
     except Exception as e:
         remove_files(foldername, finalname, logger)
         logger.print_and_flush("ERROR: {}".format(e))
