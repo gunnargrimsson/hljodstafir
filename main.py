@@ -73,11 +73,11 @@ if __name__ == "__main__":
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up
         zip_epub(foldername, finalname, logger)
+        # Remove the extra files from the server (Doesn't log any exceptions)
+        remove_files(foldername, finalname, logger, False)
         # Notifies the server that the process is complete
 		# Waits for extra 1 second to allow all other messages to clear
         logger.print_and_flush("DONE", 1)
-        # Remove the extra files from the server
-        remove_files(foldername, finalname, logger)
     except Exception as e:
         remove_files(foldername, finalname, logger)
         logger.print_and_flush("ERROR: {}".format(e))
