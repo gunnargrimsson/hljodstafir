@@ -31,7 +31,6 @@ def adjust_package_opf_smil_durations(foldername: str, location: str, smil_file_
             meta_content_replacement = smil_duration.replace('00:', '')
             # get the duration from inner text
             meta_tags[index].string.replace_with(meta_content_replacement)
-            print(meta_tags[index])
         # convert total duration to string
         total_duration_str = total_duration.strftime('%H:%M:%S.%f')[:-3]
         # replace total duration in package.opf
