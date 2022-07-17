@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors');
+
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
@@ -7,6 +9,10 @@ module.exports = {
     extend: {
       spacing: {
         'half-screen': '50vh',
+      },
+      colors: {
+        'coffee': '#c0ffee',
+        'pink': '#ffc0ee'
       }
     },
   },

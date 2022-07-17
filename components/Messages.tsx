@@ -1,6 +1,6 @@
 import { Blockquote, Timeline } from '@mantine/core';
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { Check, X } from 'tabler-icons-react';
+import { Check, X, ExclamationMark } from 'tabler-icons-react';
 import { socketMessage } from '../interfaces';
 
 const Messages = ({ messages, canCloseMessages, handleCloseFeed }: { messages: socketMessage[], canCloseMessages: boolean, handleCloseFeed: () => void }) => {
@@ -16,11 +16,12 @@ const Messages = ({ messages, canCloseMessages, handleCloseFeed }: { messages: s
 					{messages
 							.sort((a, b) => new Date(b.delivered).getTime() - new Date(a.delivered).getTime())
 							.map((message, idx) => {
+								console.log(message);
 								return (
 									<Timeline.Item
                     key={idx}
-                    bullet={message.highlight ? <X /> : <Check />}
-                    color={message.message.includes('Finished') ? 'green' : message.highlight ? 'red' : 'blue'}
+                    bullet={message.highlight == 'warning' ? <ExclamationMark /> : message.highlight == 'error' ? <X /> : <Check />}
+                    color={message.message.includes('Finished') ? 'green' : message.highlight == 'warning' ? 'yellow' : message.highlight == 'error' ? 'red' : 'blue'}
 										title={new Date(message.delivered).toLocaleString('en-GB').replace(',', '')}
 									>
 										<Blockquote cite={null} icon={null}>{message.message}</Blockquote>

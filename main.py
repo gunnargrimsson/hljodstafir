@@ -12,6 +12,7 @@ from scripts.zip_epub import check_epub_exists, zip_epub
 from scripts.get_package_opf import get_package_opf
 from scripts.get_files_from_package_opf import get_files_from_package_opf, check_toc_nav
 from scripts.check_folders import check_if_folders_exists
+from scripts.check_meta_tags import check_meta_tags
 from scripts.aeneas_languages import LANGUAGE_CODE_TO_HUMAN as languages
 import sys
 
@@ -45,6 +46,8 @@ if __name__ == "__main__":
         check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
         check_toc_nav(package_opf, foldername, location)
+        # check if package.opf has meta properties that break the book
+        check_meta_tags(package_opf, logger)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
         smil_files = get_files_from_package_opf(

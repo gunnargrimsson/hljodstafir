@@ -14,7 +14,7 @@ export type User = {
 export interface socketMessage {
 	message: string;
 	delivered: string;
-	highlight: boolean;
+	highlight: false | 'warning' | 'error';
 }
 
 export interface extendedSocket extends Socket {

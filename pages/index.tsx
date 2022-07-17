@@ -32,7 +32,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
 	const [ignoreAside, setIgnoreAside] = useState<boolean>(true);
-	const [adjustment, setAdjustment] = useState<number>(170);
+	const [adjustment, setAdjustment] = useState<number>(125);
 
 	const connectUser = async () => {
 		if (!connected) {

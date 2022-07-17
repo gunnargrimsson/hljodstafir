@@ -12,6 +12,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 		const process = spawn('python', ['main.py', folderName, options.language, stringOptions.ignoreAside, stringOptions.adjustments]);
 		process.stdout.on('data', (data: string) => {
 			const hasError = data.toString().toLowerCase().includes('error');
+			const hasWarning = data.toString().toLowerCase().includes('warning');
 			const done = data.toString().toLowerCase().includes('done');
 			if (done) {
 				const doneMessage: socketMessage = { message: 'Finished Processing', delivered: new Date().toString(), highlight: false }
@@ -20,7 +21,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 				const message: socketMessage = {
 					message: data.toString(),
 					delivered: new Date().toISOString(),
-					highlight: hasError ? true : false,
+					highlight: hasError ? 'error' : hasWarning ? 'warning' : false,
 				};
 				io.to(userID).emit('ascanius-relay', message);
 			}
@@ -30,7 +31,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 			let message: socketMessage = {
 				message: data.toString(),
 				delivered: new Date().toISOString(),
-				highlight: true,
+				highlight: 'error',
 			};
 			io.to(userID).emit('ascanius-error', message);
 		});
