@@ -15,6 +15,25 @@ def clean(foldername, location, text_files, logger: Logger):
     def has_id_or_not(css_id):
         pattern = re.compile("h[0-9]_[0-9]|hix[0-9]+|[a-z]+_[0-9]+|page-[0-9]+")
         return css_id is None or bool(pattern.match(str(css_id)))
+    
+    def check_for_text_outside_markup(text_file: str, text: str, logger: Logger):
+        """
+        Deletes from body all tags and its contents and checks if soup is empty,
+        if its not empty then it means that there is text outside the markup.
+        Throw a warning to the user about this to be fixed.
+        """
+        # make a temporary soup
+        temp_soup = BeautifulSoup(text, 'html.parser')
+        soup_body = temp_soup.body
+        # delete all tags and their contents from soup body
+        for tag in soup_body.find_all():
+            tag.decompose()
+        # check if soup body is empty
+        remaining_text = soup_body.text.strip()
+        if soup_body.text.strip() != "":
+            logger.print_and_flush(
+                "WARNING: Text outside markup in {}".format(text_file))
+            logger.print_and_flush("WARNING (Problem text):\n" + remaining_text)
 
     try:
         for id, text_file in enumerate(text_files):
@@ -22,9 +41,9 @@ def clean(foldername, location, text_files, logger: Logger):
             with open('././public/uploads/{}/{}{}'.format(foldername, location, text_file), 'r', encoding='utf8') as f:
                 text = f.read()
                 soup = BeautifulSoup(text, 'html5lib')
-
+                # Check if there is text outside of the markup (in body, i.e not inside of a p tag or h1 tag)
+                check_for_text_outside_markup(text_file, text, logger)
                 h = soup.find_all(re.compile('h1|h2|h3|h4|h5|span'), id=has_id_or_not, class_=is_sentence_or_h1, lang=None, style=None, rel=None, recursive=True)
-
                 # make a directory
                 if not os.path.exists('././public/uploads/{}/{}clean'.format(foldername, location)):
                     os.makedirs('././public/uploads/{}/{}clean'.format(foldername, location))
