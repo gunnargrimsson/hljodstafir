@@ -24,6 +24,7 @@ export interface extendedSocket extends Socket {
 
 export interface IOptions {
 	language: string;
-	ignoreAside: boolean; // boolean
+	ignoreAside: boolean;
 	adjustment: number; // number (int)
+	parentHighlighting: boolean;
 }

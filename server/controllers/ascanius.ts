@@ -7,18 +7,30 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 		console.log(options);
 		const stringOptions = {
 			ignoreAside: options.ignoreAside.toString(),
-			adjustments: options.adjustment.toString()
+			adjustments: options.adjustment.toString(),
+			parentHighlighting: options.parentHighlighting.toString(),
 		};
-		const process = spawn('python', ['main.py', folderName, options.language, stringOptions.ignoreAside, stringOptions.adjustments]);
+		const process = spawn('python', [
+			'main.py',
+			folderName,
+			options.language,
+			stringOptions.ignoreAside,
+			stringOptions.adjustments,
+			stringOptions.parentHighlighting,
+		]);
 		// process spawn with utf 8 encoding
-		process.stdout.setEncoding('utf8');		
+		process.stdout.setEncoding('utf8');
 		process.stdout.on('data', (data: string) => {
 			const hasError = data.toString().toLowerCase().includes('error');
 			const hasWarning = data.toString().toLowerCase().includes('warning');
 			const done = data.toString().toLowerCase().includes('done');
 			console.log(data.toString());
 			if (done) {
-				const doneMessage: socketMessage = { message: 'Finished Processing', delivered: new Date().toString(), highlight: false }
+				const doneMessage: socketMessage = {
+					message: 'Finished Processing',
+					delivered: new Date().toString(),
+					highlight: false,
+				};
 				io.to(userID).emit('ascanius-done', doneMessage);
 			} else {
 				const message: socketMessage = {
@@ -29,7 +41,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 				io.to(userID).emit('ascanius-relay', message);
 			}
 		});
-		process.stderr.setEncoding('utf8');		
+		process.stderr.setEncoding('utf8');
 		process.stderr.on('data', (data) => {
 			// Errors also get relayed, in case of crashes
 			let message: socketMessage = {

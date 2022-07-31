@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Notification } from '@mantine/core';
-import { Check, X } from 'tabler-icons-react';
+import { Check, X, QuestionMark } from 'tabler-icons-react';
 import { getFiles } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
@@ -32,6 +32,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
 	const [ignoreAside, setIgnoreAside] = useState<boolean>(true);
+	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
 
 	const connectUser = async () => {
@@ -126,6 +127,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 					language: languageCode,
 					ignoreAside: ignoreAside,
 					adjustment: adjustment,
+					parentHighlighting: parentHighlighting,
 				});
 			} catch (error) {
 				console.error(error);
@@ -185,8 +187,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
 							<div className='w-full flex flex-col py-4 gap-2'>
 								<label className='font-medium' htmlFor='selectLanguage'>
-									Select Language
-								</label>
+									Select Language								</label>
 								<select
 									className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2'
 									onChange={(e) => setLanguageCode(e.target.value)}
@@ -197,8 +198,9 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 									<option value='eng'>English</option>
 								</select>
 								<div className='flex flex-col rounded-sm relative milliseconds'>
-									<label className='font-medium' htmlFor='adjustment'>
+									<label className='flex font-medium' htmlFor='adjustment'>
 										Adjust highlighting
+										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
 									</label>
 									<input
 										className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
@@ -216,8 +218,22 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 										type='checkbox'
 										id='ignoreAside'
 									/>
-									<label className='font-medium' htmlFor='ignoreAside'>
+									<label className='flex font-medium' htmlFor='ignoreAside'>
 										Ignore Image Text
+										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
+									</label>
+								</div>
+								<div className='flex gap-2 place-items-center rounded-sm'>
+									<input
+										className='w-4 h-4'
+										checked={parentHighlighting}
+										onChange={() => setParentHighlighting(!parentHighlighting)}
+										type='checkbox'
+										id='parentHighlighting'
+									/>
+									<label className='flex font-medium' htmlFor='parentHighlighting'>
+										Sentence & Paragraph Highlighting
+										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
 									</label>
 								</div>
 							</div>

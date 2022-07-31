@@ -1,0 +1,6 @@
+.-epub-media-overlay-active-parent {
+  background-color: #c0ffeeee;
+  box-shadow: 0px 0px 0px 1px rgba(0,0,0,1);
+  -webkit-box-shadow: 0px 0px 0px 1px rgba(0,0,0,1);
+  -moz-box-shadow: 0px 0px 0px 1px rgba(0,0,0,1);
+}

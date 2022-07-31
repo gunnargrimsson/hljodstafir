@@ -111,7 +111,7 @@ def adjust_smil_files(smil_files: list, foldername: str, location: str, logger: 
         smil_file_end_durations.append(end_duration)
     adjust_package_opf_smil_durations(
         foldername, location, smil_file_end_durations)
-    logger.print_and_flush('Finished adjusting highlighting by {} ms.'.format(adjustment))
+    logger.print_and_flush('Adjusted highlighting by {} ms.'.format(adjustment))
 
 
 def remove_extra_colon(soup: BeautifulSoup, find_tag: str):
