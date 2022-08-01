@@ -12,5 +12,5 @@ def remove_extra_files(foldername, bookname):
   # delete the 'segments' folder
   shutil.rmtree(join("././public/uploads/{}/EPUB/Content/segments".format(foldername)))
   
-  # delte the 'clean' xhtml file
+  # delete the 'clean' xhtml file
   remove(join("././public/uploads/{}/EPUB/Content/{}_clean.xhtml".format(foldername, bookname)))

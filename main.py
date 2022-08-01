@@ -14,6 +14,7 @@ from scripts.get_files_from_package_opf import get_files_from_package_opf, check
 from scripts.check_folders import check_if_folders_exists
 from scripts.check_meta_tags import check_meta_tags
 from scripts.aeneas_languages import LANGUAGE_CODE_TO_HUMAN as languages
+from scripts.add_parent_highlighting import add_parent_highlighting
 import sys
 
 if __name__ == "__main__":
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
+    parent_highlighting = sys.argv[5] == "true" if len(sys.argv) >= 6 else False
     foldername = sys.argv[1]
     finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
     logger = Logger('./public/logs/{}-{}.log'.format(finalname,
@@ -72,6 +74,8 @@ if __name__ == "__main__":
         if (adjustment > 0):
             adjust_smil_files(smil_files, foldername,
 							location, logger, adjustment)
+        if parent_highlighting:
+            add_parent_highlighting(foldername, location, text_files, logger)
         # Remove clean files after aeneas processes them
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up

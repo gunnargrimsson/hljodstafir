@@ -7,7 +7,7 @@ def adjust_package_opf_smil_durations(foldername: str, location: str, smil_file_
         Adjusts the package.opf file to match the new smil file durations.
     """
     # read package.opf file
-    with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'r', encoding='utf-8') as f:
+    with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'r', encoding='utf8') as f:
         package_opf = f.read()
         # turn to soup
         soup = BeautifulSoup(package_opf, 'xml')
@@ -37,7 +37,7 @@ def adjust_package_opf_smil_durations(foldername: str, location: str, smil_file_
         meta_tags[-1].string.replace_with(total_duration_str.strip())
         remove_extra_colon(soup, 'package')
         # write the new package.opf file
-        with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'w', encoding='utf-8') as newf:
+        with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'w', encoding='utf8') as newf:
             newf.write(str(soup))
 
 
@@ -46,7 +46,7 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
         Adjusts the smil file based on some threshold that can be set by the user, defaults to 100ms.
     """
     newClipEnd = '00:00:00.000'
-    with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'r') as f:
+    with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'r', encoding='utf8') as f:
         smil = f.read()
         # turn to soup
         soup = BeautifulSoup(smil, 'xml')
@@ -111,7 +111,7 @@ def adjust_smil_files(smil_files: list, foldername: str, location: str, logger: 
         smil_file_end_durations.append(end_duration)
     adjust_package_opf_smil_durations(
         foldername, location, smil_file_end_durations)
-    logger.print_and_flush('Finished adjusting highlighting by {} ms.'.format(adjustment))
+    logger.print_and_flush('Adjusted highlighting by {} ms.'.format(adjustment))
 
 
 def remove_extra_colon(soup: BeautifulSoup, find_tag: str):

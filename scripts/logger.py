@@ -8,7 +8,7 @@ class Logger:
 
     def log(self, message):
         """Logs a message to the log file."""
-        with open(self.log_file, 'a') as f:
+        with open(self.log_file, 'a', encoding='utf8') as f:
             f.write('[{}] {}'.format(datetime.now(), message + '\n'))
 
     def print_and_flush(self, string: str, sleep: float=0.1):
@@ -16,7 +16,7 @@ class Logger:
         Prints a string and flushes the output buffer. Default sleeps for 0.1 seconds.
         Encodes the string to utf8 to avoid errors.
         """
-        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stdout.reconfigure(encoding='utf8')
         if (sleep > 0):
             time.sleep(sleep)
         print(string)
