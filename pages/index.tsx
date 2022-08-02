@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Notification } from '@mantine/core';
-import { Check, X, QuestionMark } from 'tabler-icons-react';
+import { QuestionMark } from 'tabler-icons-react';
 import { getFiles } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
@@ -13,6 +12,8 @@ import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
 import { getLogs } from './api/files/files';
 import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
+import Notifications from '../components/Notifications';
+import Tooltip from '../components/Tooltip';
 // import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
@@ -172,16 +173,13 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 					<div className='text-2xl font-semibold cursor-pointer select-none'>🎼 Hljóðstafir</div>
 				</Link>
 			</div>
-			{uploaded && (
-				<Notification onClose={() => setUploaded(false)} icon={<Check size={18} />} color='teal' title='Upload Status'>
-					{uploadMessage}
-				</Notification>
-			)}
-			{error && (
-				<Notification onClose={() => setError(null)} icon={<X size={18} />} color='red' title='Upload Status'>
-					{error}
-				</Notification>
-			)}
+			<Notifications
+				uploaded={uploaded}
+				setUploaded={setUploaded}
+				uploadMessage={uploadMessage}
+				error={error}
+				setError={setError}
+			/>
 			<div className='bg-gray-200 h-full'>
 				<div className='flex place-content-center justify-center'>
 					{messages.length === 0 && (
@@ -202,27 +200,19 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 								</select>
 								<div className='p-2 shadow-red'>
 									<div className='text-red-700 text-sm underline'>
-										<div className='has-tooltip'>
+										<Tooltip text='These features are still in development and may not work as expected. Please notify us of any issues you encounter.'>
 											Experimental
-											<span className='tooltip prose w-80 -top-28 font-medium'>
-												These features are still in development and may not work as expected.
-												Please notify us of any issues you encounter.
-											</span>
-										</div>
+										</Tooltip>
 									</div>
 									<div className='flex flex-col rounded-sm relative milliseconds'>
 										<label className='flex font-medium' htmlFor='adjustment'>
 											Adjust highlighting
-											<div className='has-tooltip'>
+											<Tooltip text='Highlighting of text will be adjusted by x ms, larger number will make the highlighting occur sooner.'>
 												<QuestionMark
 													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
-												<span className='tooltip prose w-80 -top-28'>
-													Highlighting of text will be adjusted by x ms, larger number will make the highlighting occur
-													sooner.
-												</span>
-											</div>
+											</Tooltip>
 										</label>
 										<input
 											className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
@@ -242,16 +232,15 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 										/>
 										<label className='flex font-medium' htmlFor='ignoreAside'>
 											Ignore Image Text
-											<div className='has-tooltip'>
+											<Tooltip
+												text='Image text placed inside of &lt;aside&gt; is not read in book and therefore should be ignored
+													by hljóðstafir.'
+											>
 												<QuestionMark
 													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
-												<span className='tooltip prose w-80 -top-28'>
-													Image text placed inside of &lt;aside&gt; is not read in book and therefore should be ignored
-													by hljóðstafir.
-												</span>
-											</div>
+											</Tooltip>
 										</label>
 									</div>
 									<div className='flex gap-2 place-items-center rounded-sm'>
@@ -264,15 +253,12 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 										/>
 										<label className='flex font-medium' htmlFor='parentHighlighting'>
 											Sentence & Paragraph Highlighting
-											<div className='has-tooltip'>
+											<Tooltip text='Paragraphs are highlighted simultaneously if more than one sentence is present.'>
 												<QuestionMark
 													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
-												<span className='tooltip prose w-80 -top-28'>
-													Paragraphs are highlighted simultaneously if more than one sentence is present.
-												</span>
-											</div>
+											</Tooltip>
 										</label>
 									</div>
 								</div>
