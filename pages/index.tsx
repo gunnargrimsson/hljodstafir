@@ -31,7 +31,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [connected, setConnected] = useState<boolean>(false);
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
-	const [ignoreAside, setIgnoreAside] = useState<boolean>(true);
+	const [ignoreAside, setIgnoreAside] = useState<boolean>(false);
 	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
 
@@ -158,17 +158,19 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 		if (isNaN(value)) {
 			setAdjustment(0);
 		}
-	}
+	};
 
 	const handleCloseFeed = () => {
 		setCanCloseMessages(false);
 		setMessages([]);
-	}
+	};
 
 	return (
 		<div className='flex h-screen flex-col'>
 			<div className='w-full px-5 py-10'>
-				<Link href={'/'}><div className='text-2xl font-semibold cursor-pointer select-none'>🎼 Hljóðstafir</div></Link>
+				<Link href={'/'}>
+					<div className='text-2xl font-semibold cursor-pointer select-none'>🎼 Hljóðstafir</div>
+				</Link>
 			</div>
 			{uploaded && (
 				<Notification onClose={() => setUploaded(false)} icon={<Check size={18} />} color='teal' title='Upload Status'>
@@ -187,7 +189,8 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 							<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
 							<div className='w-full flex flex-col py-4 gap-2'>
 								<label className='font-medium' htmlFor='selectLanguage'>
-									Select Language								</label>
+									Select Language{' '}
+								</label>
 								<select
 									className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2'
 									onChange={(e) => setLanguageCode(e.target.value)}
@@ -197,44 +200,81 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 									<option value='dan'>Danish</option>
 									<option value='eng'>English</option>
 								</select>
-								<div className='flex flex-col rounded-sm relative milliseconds'>
-									<label className='flex font-medium' htmlFor='adjustment'>
-										Adjust highlighting
-										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
-									</label>
-									<input
-										className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
-										onChange={handleAdjustmentChange}
-										value={adjustment}
-										type='number'
-										id='adjustment'
-									/>
-								</div>
-								<div className='flex gap-2 place-items-center rounded-sm'>
-									<input
-										className='w-4 h-4'
-										checked={ignoreAside}
-										onChange={() => setIgnoreAside(!ignoreAside)}
-										type='checkbox'
-										id='ignoreAside'
-									/>
-									<label className='flex font-medium' htmlFor='ignoreAside'>
-										Ignore Image Text
-										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
-									</label>
-								</div>
-								<div className='flex gap-2 place-items-center rounded-sm'>
-									<input
-										className='w-4 h-4'
-										checked={parentHighlighting}
-										onChange={() => setParentHighlighting(!parentHighlighting)}
-										type='checkbox'
-										id='parentHighlighting'
-									/>
-									<label className='flex font-medium' htmlFor='parentHighlighting'>
-										Sentence & Paragraph Highlighting
-										<QuestionMark className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1' size={18} />
-									</label>
+								<div className='p-2 shadow-red'>
+									<div className='text-red-700 text-sm underline'>
+										<div className='has-tooltip'>
+											Experimental
+											<span className='tooltip prose w-80 -top-28 font-medium'>
+												These features are still in development and may not work as expected.
+												Please notify us of any issues you encounter.
+											</span>
+										</div>
+									</div>
+									<div className='flex flex-col rounded-sm relative milliseconds'>
+										<label className='flex font-medium' htmlFor='adjustment'>
+											Adjust highlighting
+											<div className='has-tooltip'>
+												<QuestionMark
+													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													size={18}
+												/>
+												<span className='tooltip prose w-80 -top-28'>
+													Highlighting of text will be adjusted by x ms, larger number will make the highlighting occur
+													sooner.
+												</span>
+											</div>
+										</label>
+										<input
+											className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
+											onChange={handleAdjustmentChange}
+											value={adjustment}
+											type='number'
+											id='adjustment'
+										/>
+									</div>
+									<div className='flex gap-2 place-items-center rounded-sm'>
+										<input
+											className='w-4 h-4'
+											checked={ignoreAside}
+											onChange={() => setIgnoreAside(!ignoreAside)}
+											type='checkbox'
+											id='ignoreAside'
+										/>
+										<label className='flex font-medium' htmlFor='ignoreAside'>
+											Ignore Image Text
+											<div className='has-tooltip'>
+												<QuestionMark
+													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													size={18}
+												/>
+												<span className='tooltip prose w-80 -top-28'>
+													Image text placed inside of &lt;aside&gt; is not read in book and therefore should be ignored
+													by hljóðstafir.
+												</span>
+											</div>
+										</label>
+									</div>
+									<div className='flex gap-2 place-items-center rounded-sm'>
+										<input
+											className='w-4 h-4'
+											checked={parentHighlighting}
+											onChange={() => setParentHighlighting(!parentHighlighting)}
+											type='checkbox'
+											id='parentHighlighting'
+										/>
+										<label className='flex font-medium' htmlFor='parentHighlighting'>
+											Sentence & Paragraph Highlighting
+											<div className='has-tooltip'>
+												<QuestionMark
+													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													size={18}
+												/>
+												<span className='tooltip prose w-80 -top-28'>
+													Paragraphs are highlighted simultaneously if more than one sentence is present.
+												</span>
+											</div>
+										</label>
+									</div>
 								</div>
 							</div>
 							<FileInputButton
