@@ -16,7 +16,7 @@
 }
 
 .has-tooltip {
-  @apply relative;
+  @apply relative cursor-help;
 }
 
 @tailwind utilities;

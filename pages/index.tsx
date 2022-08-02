@@ -215,7 +215,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 											Adjust highlighting
 											<div className='has-tooltip'>
 												<QuestionMark
-													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
 												<span className='tooltip prose w-80 -top-28'>
@@ -244,7 +244,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 											Ignore Image Text
 											<div className='has-tooltip'>
 												<QuestionMark
-													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
 												<span className='tooltip prose w-80 -top-28'>
@@ -266,7 +266,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 											Sentence & Paragraph Highlighting
 											<div className='has-tooltip'>
 												<QuestionMark
-													className='bg-slate-800 hover:bg-slate-700 cursor-help text-white place-self-center rounded-full p-0.5 ml-1'
+													className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 													size={18}
 												/>
 												<span className='tooltip prose w-80 -top-28'>
