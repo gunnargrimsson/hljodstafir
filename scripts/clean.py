@@ -5,10 +5,9 @@ from scripts.logger import Logger
 
 def clean(foldername, location, text_files, logger: Logger):
     """Cleans the text files for aeneas to correctly force align text and audio."""
-    #TODO: Stop processing if there is an error.
     # Encode each segment with xml so that non ascii characters won't get distorted
     encoding = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    error_files = {}
+    errors = []
 
     def is_sentence_or_h1(css_class):
             # If the sentence has the class="ignore" then it will not be included (only needed when some text is not read)
@@ -36,11 +35,11 @@ def clean(foldername, location, text_files, logger: Logger):
             logger.print_and_flush(
                 "ERROR: Text outside markup in {}".format(text_file))
             logger.print_and_flush("ERROR (Problem text):\n" + remaining_text.strip('\n'))
-            error_files[text_file] = {
+            errors.append({
                 "error": "Text outside markup",
                 "text": remaining_text.strip('\n'),
                 "file": text_file
-            }
+            })
 
     try:
         for id, text_file in enumerate(text_files):
@@ -60,12 +59,9 @@ def clean(foldername, location, text_files, logger: Logger):
                     for i in h:
                         if i.text is not None:
                             f.write(str(i))
-        if (len(error_files) > 0):
-            # If there is an error, then don't process the file
-            raise Exception("""There is text outside of the markup in {} files""" .format(len(error_files)))
+        if (len(errors) > 0):
+            return False
         return True
     except Exception as e:
-        if (len(error_files) > 0):
-            return False
         logger.print_and_flush('ERROR: Cleaning file {} failed with error: {}'.format(current_text_file, e))
         return False
