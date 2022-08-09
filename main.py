@@ -66,7 +66,9 @@ if __name__ == "__main__":
         # Markup the text files before for sentence level highlighting
         markup(foldername, location, text_files, ignore_aside, logger)
         # Create clean text files of everything except the text and markup for aeneas
-        clean(foldername, location, text_files, logger)
+        cleaned = clean(foldername, location, text_files, logger)
+        if (cleaned == False):
+            raise Exception("Error occurred while cleaning text files.")
         # TODO: Remove all audio files and text files if "clean file" is "empty" of tags and warn the user
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code,

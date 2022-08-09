@@ -7,6 +7,7 @@ def clean(foldername, location, text_files, logger: Logger):
     """Cleans the text files for aeneas to correctly force align text and audio."""
     # Encode each segment with xml so that non ascii characters won't get distorted
     encoding = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    errors = []
 
     def is_sentence_or_h1(css_class):
             # If the sentence has the class="ignore" then it will not be included (only needed when some text is not read)
@@ -32,8 +33,13 @@ def clean(foldername, location, text_files, logger: Logger):
         remaining_text = soup_body.text.strip()
         if soup_body.text.strip() != "":
             logger.print_and_flush(
-                "WARNING: Text outside markup in {}".format(text_file))
-            logger.print_and_flush("WARNING (Problem text):\n" + remaining_text)
+                "ERROR: Text outside markup in {}".format(text_file))
+            logger.print_and_flush("ERROR (Problem text):\n" + remaining_text.strip('\n'))
+            errors.append({
+                "error": "Text outside markup",
+                "text": remaining_text.strip('\n'),
+                "file": text_file
+            })
 
     try:
         for id, text_file in enumerate(text_files):
@@ -53,6 +59,9 @@ def clean(foldername, location, text_files, logger: Logger):
                     for i in h:
                         if i.text is not None:
                             f.write(str(i))
+        if (len(errors) > 0):
+            return False
+        return True
     except Exception as e:
         logger.print_and_flush('ERROR: Cleaning file {} failed with error: {}'.format(current_text_file, e))
         return False

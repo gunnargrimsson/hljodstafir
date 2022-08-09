@@ -12,7 +12,10 @@ module.exports = {
       },
       colors: {
         'coffee': '#c0ffee',
-        'pink': '#ffc0ee'
+        'pink': '#FFC0EE'
+      },
+      boxShadow: {
+        'red': '0px 0px 0px 1px rgba(185, 28, 28,1)'
       }
     },
   },
