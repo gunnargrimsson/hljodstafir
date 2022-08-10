@@ -33,12 +33,17 @@ def clean(foldername, location, text_files, logger: Logger):
         # check if soup body is empty
         remaining_text = soup_body.text.strip()
         if soup_body.text.strip() != "":
+            lines = remaining_text.splitlines()
+            # clean the lines
+            lines = [line.strip() for line in lines if line.strip() != '']
+            # format lines a string to be printed
+            lines = '\n'.join(lines)
             logger.print_and_flush(
                 "ERROR: Text outside markup in {}".format(text_file))
-            logger.print_and_flush("ERROR (Problem text):\n" + remaining_text.strip('\n'))
+            logger.print_and_flush("ERROR (Problem text):\n" + lines)
             errors.append({
                 "error": "Text outside markup",
-                "text": remaining_text.strip('\n'),
+                "text": lines,
                 "file": text_file
             })
 
