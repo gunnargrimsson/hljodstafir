@@ -8,6 +8,7 @@ def clean(foldername, location, text_files, logger: Logger):
     # Encode each segment with xml so that non ascii characters won't get distorted
     encoding = '<?xml version="1.0" encoding="UTF-8"?>\n'
     errors = []
+    current_text_file = None
 
     def is_sentence_or_h1(css_class):
             # If the sentence has the class="ignore" then it will not be included (only needed when some text is not read)

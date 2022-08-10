@@ -1,6 +1,7 @@
 from datetime import datetime
 from scripts.adjust_smil_files import adjust_smil_files
 from scripts.check_audio_length import check_audio_length
+from scripts.check_empty_files import check_empty_files
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
@@ -69,7 +70,7 @@ if __name__ == "__main__":
         cleaned = clean(foldername, location, text_files, logger)
         if (cleaned == False):
             raise Exception("Error occurred while cleaning text files.")
-        # TODO: Remove all audio files and text files if "clean file" is "empty" of tags and warn the user
+        check_empty_files(foldername, location, text_files, audio_files, logger)
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code,
                     foldername, location, logger)
