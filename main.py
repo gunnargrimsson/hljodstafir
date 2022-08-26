@@ -45,6 +45,8 @@ if __name__ == "__main__":
                 "Could not find package.opf, Not a valid EPUB File.\nPlease fix, refresh and try again.")
 
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
+        if audio_files is None:
+            raise Exception("Could not find audio files in package.opf")
         # check if audio files lengths are within allowed range
         check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
@@ -53,8 +55,12 @@ if __name__ == "__main__":
         check_meta_tags(package_opf, logger)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
+        if text_files is None:
+            raise Exception("Could not find text files in package.opf")
         smil_files = get_files_from_package_opf(
             package_opf, 'application/smil+xml')
+        if smil_files is None:
+            raise Exception("Could not find smil files in package.opf")
 
         logger.print_and_flush("Audio Files: {}".format(len(audio_files)))
         logger.print_and_flush("Text Files: {}".format(len(text_files)), 0.1)
