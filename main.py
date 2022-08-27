@@ -24,11 +24,13 @@ if __name__ == "__main__":
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
-    parent_highlighting = sys.argv[5] == "true" if len(sys.argv) >= 6 else False
+    parent_highlighting = sys.argv[5] == "true" if len(
+        sys.argv) >= 6 else False
     foldername = sys.argv[1]
     finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
     logger = Logger('./public/logs/{}-{}.log'.format(finalname,
                     datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
+    error_has_been_logged = False
     try:
         logger.print_and_flush("Processing: {}".format(finalname))
         logger.print_and_flush("Language: {}".format(
@@ -48,7 +50,8 @@ if __name__ == "__main__":
         if audio_files is None:
             raise Exception("Could not find audio files in package.opf")
         # check if audio files lengths are within allowed range
-        check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
+        check_audio_length(mp3_max_minutes_length,
+                           foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
         check_toc_nav(package_opf, foldername, location)
         # check if package.opf has meta properties that break the book
@@ -68,7 +71,13 @@ if __name__ == "__main__":
         segmentation_correct = len(audio_files) == len(text_files)
         if not segmentation_correct:
             logger.print_and_flush(
-                "WARNING: Number of mp3 files and number of segments do not match.", 0.1)
+                "ERROR: Number of mp3 files and number of text segments do not match.")
+            logger.print_and_flush(
+                "ERROR: List of found text and audio files can be found in the log file.", 0.1)
+            logger.log("Audio Files: \n{}".format(audio_files))
+            logger.log("Text Files: \n{}".format(text_files))
+            error_has_been_logged = True
+            raise Exception("Number of mp3 files and number of text segments do not match.")
 
         # Markup the text files before for sentence level highlighting
         markup(foldername, location, text_files, ignore_aside, logger)
@@ -76,13 +85,14 @@ if __name__ == "__main__":
         cleaned = clean(foldername, location, text_files, logger)
         if (cleaned == False):
             raise Exception("Error occurred while cleaning text files.")
-        check_empty_files(foldername, location, text_files, audio_files, logger)
+        check_empty_files(foldername, location,
+                          text_files, audio_files, logger)
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code,
                     foldername, location, logger)
         if (adjustment > 0):
             adjust_smil_files(smil_files, foldername,
-							location, logger, adjustment)
+                              location, logger, adjustment)
         if parent_highlighting:
             add_parent_highlighting(foldername, location, text_files, logger)
         # Remove clean files after aeneas processes them
@@ -92,9 +102,10 @@ if __name__ == "__main__":
         # Remove the extra files from the server (Doesn't log any exceptions)
         remove_files(foldername, finalname, logger, False)
         # Notifies the server that the process is complete
-		# Waits for extra 1 second to allow all other messages to clear
+        # Waits for extra 1 second to allow all other messages to clear
         logger.print_and_flush("DONE", 1)
     except Exception as e:
         remove_files(foldername, finalname, logger)
-        logger.print_and_flush("ERROR: {}".format(e))
+        if not error_has_been_logged:
+            logger.print_and_flush("ERROR: {}".format(e))
         raise
