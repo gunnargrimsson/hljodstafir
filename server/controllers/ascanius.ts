@@ -9,6 +9,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 			ignoreAside: options.ignoreAside.toString(),
 			adjustments: options.adjustment.toString(),
 			parentHighlighting: options.parentHighlighting.toString(),
+			longerAudio: options.longerAudio.toString(),
 		};
 		const process = spawn('python', [
 			'main.py',
@@ -17,6 +18,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 			stringOptions.ignoreAside,
 			stringOptions.adjustments,
 			stringOptions.parentHighlighting,
+			stringOptions.longerAudio
 		]);
 		// process spawn with utf 8 encoding
 		process.stdout.setEncoding('utf8');

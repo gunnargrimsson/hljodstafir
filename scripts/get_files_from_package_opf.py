@@ -9,6 +9,7 @@ def get_files_from_package_opf(package_opf: str, file_type: str):
       If the file type is xhtml it will make sure that it has media-overlay (smil).
     """
     package_manifest_items = get_all_items_from_package_opf(package_opf)
+    package_manifest_files = None
     if (file_type == 'application/xhtml+xml'):
         package_manifest_files = [item.get('href') for item in package_manifest_items if item.get(
             'media-type') == file_type and 'smil' in str(item.get('media-overlay')) and str(item.get('href')).lower() not in ignore_file_list]

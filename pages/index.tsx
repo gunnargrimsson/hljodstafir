@@ -34,8 +34,10 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
 	const [ignoreAside, setIgnoreAside] = useState<boolean>(false);
+	const [adjusting, setAdjusting] = useState<boolean>(false);
 	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
+	const [longerAudio, setLongerAudio] = useState<boolean>(false);
 
 	const connectUser = async () => {
 		if (!connected) {
@@ -125,8 +127,9 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 				socket.emit('ascanius', res.data.data[0].split('.')[0], {
 					language: languageCode,
 					ignoreAside: ignoreAside,
-					adjustment: adjustment,
+					adjustment: adjusting ? adjustment : 0,
 					parentHighlighting: parentHighlighting,
+					longerAudio: longerAudio,
 				});
 			} catch (error) {
 				console.error(error);
@@ -198,6 +201,14 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 											</Tooltip>
 										</div>
 										<div className='flex flex-col rounded-sm relative milliseconds'>
+											<div className='flex gap-2 place-items-center rounded-sm'>
+											<input
+												className='w-4 h-4'
+												checked={adjusting}
+												onChange={() => setAdjusting(!adjusting)}
+												type='checkbox'
+												id='adjusting'
+											/>
 											<label className='flex font-medium' htmlFor='adjustment'>
 												Adjust highlighting
 												<Tooltip text='Highlighting of text will be adjusted by x ms, larger number will make the highlighting occur sooner.'>
@@ -207,6 +218,7 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 													/>
 												</Tooltip>
 											</label>
+											</div>
 											<input
 												className='flex border-2 focus:outline-none gap-2 place-items-center place-content-center rounded-sm px-2 pr-8 appearance-none'
 												onChange={handleAdjustmentChange}
@@ -247,6 +259,24 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 											<label className='flex font-medium' htmlFor='parentHighlighting'>
 												Sentence & Paragraph Highlighting
 												<Tooltip text='Paragraphs are highlighted simultaneously if more than one sentence is present.'>
+													<QuestionMark
+														className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
+														size={18}
+													/>
+												</Tooltip>
+											</label>
+										</div>
+										<div className='flex gap-2 place-items-center rounded-sm'>
+											<input
+												className='w-4 h-4'
+												checked={longerAudio}
+												onChange={() => setLongerAudio(!longerAudio)}
+												type='checkbox'
+												id='longerAudio'
+											/>
+											<label className='flex font-medium' htmlFor='longerAudio'>
+												Allow mp3 files longer than 30 minutes
+												<Tooltip text='MP3 files longer than 30 minutes may result in a much longer wait time to process the alignment.'>
 													<QuestionMark
 														className='bg-slate-800 hover:bg-slate-700 text-white place-self-center rounded-full p-0.5 ml-1'
 														size={18}

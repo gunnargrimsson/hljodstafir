@@ -1,6 +1,7 @@
 from datetime import datetime
 from scripts.adjust_smil_files import adjust_smil_files
 from scripts.check_audio_length import check_audio_length
+from scripts.check_empty_files import check_empty_files
 from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
@@ -19,15 +20,19 @@ import sys
 
 if __name__ == "__main__":
     check_if_folders_exists()
+    # Currently if the computer running the script is not a linux machine the script will stall on files longer than 30~ minutes.
     mp3_max_minutes_length = 30
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
-    parent_highlighting = sys.argv[5] == "true" if len(sys.argv) >= 6 else False
+    parent_highlighting = sys.argv[5] == "true" if len(
+        sys.argv) >= 6 else False
+    allow_longer_mp3 = sys.argv[6] == "true" if len(sys.argv) >= 7 else False
     foldername = sys.argv[1]
     finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
     logger = Logger('./public/logs/{}-{}.log'.format(finalname,
                     datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
+    error_has_been_logged = False
     try:
         logger.print_and_flush("Processing: {}".format(finalname))
         logger.print_and_flush("Language: {}".format(
@@ -44,16 +49,24 @@ if __name__ == "__main__":
                 "Could not find package.opf, Not a valid EPUB File.\nPlease fix, refresh and try again.")
 
         audio_files = get_files_from_package_opf(package_opf, 'audio/mpeg')
+        if audio_files is None:
+            raise Exception("Could not find audio files in package.opf")
         # check if audio files lengths are within allowed range
-        check_audio_length(mp3_max_minutes_length, foldername, location, audio_files)
+        if not allow_longer_mp3:
+            check_audio_length(mp3_max_minutes_length,
+                               foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
         check_toc_nav(package_opf, foldername, location)
         # check if package.opf has meta properties that break the book
         check_meta_tags(package_opf, logger)
         text_files = get_files_from_package_opf(
             package_opf, 'application/xhtml+xml')
+        if text_files is None:
+            raise Exception("Could not find text files in package.opf")
         smil_files = get_files_from_package_opf(
             package_opf, 'application/smil+xml')
+        if smil_files is None:
+            raise Exception("Could not find smil files in package.opf")
 
         logger.print_and_flush("Audio Files: {}".format(len(audio_files)))
         logger.print_and_flush("Text Files: {}".format(len(text_files)), 0.1)
@@ -61,7 +74,14 @@ if __name__ == "__main__":
         segmentation_correct = len(audio_files) == len(text_files)
         if not segmentation_correct:
             logger.print_and_flush(
-                "WARNING: Number of mp3 files and number of segments do not match.", 0.1)
+                "ERROR: Number of mp3 files and number of text segments do not match.")
+            logger.print_and_flush(
+                "ERROR: List of found text and audio files can be found in the log file.", 0.1)
+            logger.log("Audio Files: \n{}".format(audio_files))
+            logger.log("Text Files: \n{}".format(text_files))
+            error_has_been_logged = True
+            raise Exception(
+                "Number of mp3 files and number of text segments do not match.")
 
         # Markup the text files before for sentence level highlighting
         markup(foldername, location, text_files, ignore_aside, logger)
@@ -69,13 +89,14 @@ if __name__ == "__main__":
         cleaned = clean(foldername, location, text_files, logger)
         if (cleaned == False):
             raise Exception("Error occurred while cleaning text files.")
-        # TODO: Remove all audio files and text files if "clean file" is "empty" of tags and warn the user
+        check_empty_files(foldername, location,
+                          text_files, audio_files, logger)
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code,
                     foldername, location, logger)
         if (adjustment > 0):
             adjust_smil_files(smil_files, foldername,
-							location, logger, adjustment)
+                              location, logger, adjustment)
         if parent_highlighting:
             add_parent_highlighting(foldername, location, text_files, logger)
         # Remove clean files after aeneas processes them
@@ -85,9 +106,10 @@ if __name__ == "__main__":
         # Remove the extra files from the server (Doesn't log any exceptions)
         remove_files(foldername, finalname, logger, False)
         # Notifies the server that the process is complete
-		# Waits for extra 1 second to allow all other messages to clear
+        # Waits for extra 1 second to allow all other messages to clear
         logger.print_and_flush("DONE", 1)
     except Exception as e:
         remove_files(foldername, finalname, logger)
-        logger.print_and_flush("ERROR: {}".format(e))
+        if not error_has_been_logged:
+            logger.print_and_flush("ERROR: {}".format(e))
         raise

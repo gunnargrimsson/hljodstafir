@@ -27,4 +27,5 @@ export interface IOptions {
 	ignoreAside: boolean;
 	adjustment: number; // number (int)
 	parentHighlighting: boolean;
+	longerAudio: boolean;
 }

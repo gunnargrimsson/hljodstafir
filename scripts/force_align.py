@@ -8,7 +8,7 @@ def force_align(audio_files: list, text_files: list, language_code: str, foldern
     """Forces the alignment of the audio and text files."""
     for i, mp3 in enumerate(audio_files):
         # Setup config string & absolute file path for audio/text/syncfile
-        config_string = "task_language={}|is_text_type=unparsed|os_task_file_format=smil|os_task_file_smil_audio_ref={}|os_task_file_smil_page_ref={}|allow_unlisted_languages=True".format(
+        config_string = "allow_unlisted_languages=True|c_extensions=True|cdtw=True|cew=True|cew_subprocess_enabled=False|cew_subprocess_path=python|cfw=True|cmfcc=True|downloader_retry_attempts=5|downloader_sleep=1.000|dtw_algorithm=stripe|dtw_margin=120.000|dtw_margin_l1=120.000|dtw_margin_l2=60.000|dtw_margin_l3=20.000|task_language={}|is_text_type=unparsed|os_task_file_format=smil|os_task_file_smil_audio_ref={}|os_task_file_smil_page_ref={}".format(
             language_code, mp3, text_files[i])
         # Create Task
         task = Task(config_string=config_string)
