@@ -4,7 +4,8 @@ import path from 'path';
 const handler = async (req: any, res: any) => {
 	const files = await getFiles();
 	const logs = await getLogs();
-	res.status(200).json({ files: files.mapFiles, logs: logs.mapLogs });
+	const version = await getAppVersion();
+	res.status(200).json({ files: files.mapFiles, logs: logs.mapLogs, version: version });
 };
 
 export const getFiles = async () => {
@@ -48,5 +49,10 @@ export const getLogs = async () => {
 	});
 	return { mapLogs };
 };
+
+export const getAppVersion = async () => {
+	return process.env.REACT_APP_VERSION;
+}
+
 
 export default handler;

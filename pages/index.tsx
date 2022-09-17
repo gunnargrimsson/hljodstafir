@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { QuestionMark } from 'tabler-icons-react';
-import { getFiles } from './api/files';
+import { getFiles, getLogs, getAppVersion } from './api/files';
 import axios from 'axios';
 import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';
@@ -10,7 +10,6 @@ import { io } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
 import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
-import { getLogs } from './api/files/files';
 import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
 import Notifications from '../components/Notifications';
 import Tooltip from '../components/Tooltip';
@@ -19,7 +18,7 @@ import Container from '../components/Container';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
 
-const IndexPage = ({ mapFiles, mapLogs }) => {
+const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	const router = useRouter();
 	const redirected = router.query.redirected;
 	const [uploaded, setUploaded] = useState<boolean>(false);
@@ -176,7 +175,8 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 					error={error}
 					setError={setError}
 				/>
-				<div className='bg-gray-200 h-full'>
+				<div className='bg-gray-200 h-full relative'>
+					<div className='absolute font-extralight text-xs opacity-50 p-2 right-0 select-none pointer-events-none'>v {appVersion}</div>
 					<div className='flex place-content-center justify-center'>
 						{messages.length === 0 && (
 							<div className='px-5 my-10 py-4 bg-white rounded-sm flex flex-col'>
@@ -352,7 +352,8 @@ const IndexPage = ({ mapFiles, mapLogs }) => {
 export async function getServerSideProps() {
 	const { mapFiles } = await getFiles();
 	const { mapLogs } = await getLogs();
-	return { props: { mapFiles, mapLogs } };
+	const appVersion = await getAppVersion();
+	return { props: { mapFiles, mapLogs, appVersion } };
 }
 
 export default IndexPage;
