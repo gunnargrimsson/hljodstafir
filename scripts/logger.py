@@ -5,6 +5,7 @@ import time
 class Logger:
     def __init__(self, log_file):
         self.log_file = log_file
+        self.log_end = []
 
     def log(self, message):
         """Logs a message to the log file."""
@@ -22,3 +23,18 @@ class Logger:
         print(string)
         sys.stdout.flush()
         self.log(string)
+
+    def add_to_log_end(self, string):
+        """
+        Adds a string to the log end.
+        """
+        self.log_end.append(string)
+
+    def print_log_end(self):
+        """
+        Prints the log end and flushes the output buffer.
+        """
+        sys.stdout.reconfigure(encoding='utf8')
+        self.print_and_flush("\n\nPlaces of interest in the text:")
+        for string in self.log_end:
+            self.print_and_flush(string)

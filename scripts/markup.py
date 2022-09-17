@@ -14,6 +14,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 prefix = ['marin', 'alfred', 'gunnar', 'hafthor', 'hulda', 'sigrun', 'einar']
 r_prefix = random.choice(prefix)
 tags_to_look_out_for = 'h1|h2|h3|h4|h5|p|li|td|th|dt|dd|blockquote'
+tags_to_alert_at_end = 'table|img'
 
 def write_to_soup(p, sentences, n_suffix, z_fill_len, soup):
     """Returns a list of BeautifulSoup tags to insert into the soup."""
@@ -22,11 +23,13 @@ def write_to_soup(p, sentences, n_suffix, z_fill_len, soup):
     contains_links = re.findall(
         r'(<a href\=\"[\w\d\W]+\">[\w\d\W]+</a>)', sentences)
     # Generate a list of sentences using regex string
+    # previous regex: r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)' - Didn't check for
+    # The current regex also checks for any symbols that might be at the end of a sentence (e.g. !, ?, ., etc.) but especially quotation marks
     sentences = re.split(
-        r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)', sentences)
+        r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\'\/\“\„\”\`\«\»\「\」]+\s*[\.\,\%\:\;\?\!\(\)\-\/\"\'\”\`\»\」]{0,5}(\/\w+)*[\/>]*)', sentences)
     # Remove all empty elements in array
     sentences = list(filter(None, sentences))
-    # ! print(sentences)
+    # print(sentences)
     # Links have numerous '.' inside of them but we shouldn't split them up, so here we are putting them back together.
     for link in contains_links:
         a_opening_index = None
@@ -90,6 +93,14 @@ def markup(foldername: str, location: str, text_files: list, ignore_aside: bool,
                 else:
                     paragraphs = soup.find_all(re.compile(
                         tags_to_look_out_for), id=valid_id)
+                may_need_manual_check_at_end = soup.find_all(re.compile(tags_to_alert_at_end))
+                if len(may_need_manual_check_at_end) > 0:
+                    images_count = len([tag for tag in may_need_manual_check_at_end if tag.name == 'img'])
+                    tables_count = len([tag for tag in may_need_manual_check_at_end if tag.name == 'table'])
+                    images = '{}'.format('\nImages: ' + str(images_count)) if images_count > 0 else ''
+                    tables = '{}'.format('\nTables: ' + str(tables_count)) if tables_count > 0 else ''
+                    logger.add_to_log_end('Found in File: {}{}\n\n'.format(
+                        text_file, '{}{}{}'.format(images, tables)))
                 # To ensure that a long book with many paragraphs will always have an identifier that fits
                 z_fill_len = int(math.log10(
                     1 if len(paragraphs) <= 0 else len(paragraphs)) + 1) + 1
