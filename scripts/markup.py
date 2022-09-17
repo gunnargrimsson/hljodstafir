@@ -22,11 +22,13 @@ def write_to_soup(p, sentences, n_suffix, z_fill_len, soup):
     contains_links = re.findall(
         r'(<a href\=\"[\w\d\W]+\">[\w\d\W]+</a>)', sentences)
     # Generate a list of sentences using regex string
+    # previous regex: r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)' - Didn't check for
+    # The current regex also checks for any symbols that might be at the end of a sentence (e.g. !, ?, ., etc.) but especially quotation marks
     sentences = re.split(
-        r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\/]+\s*(\/\w+)*[\/>]*)', sentences)
+        r'([^\.\?\!]+[<\/\w+>]*[\w\s]*[\.\,\w\%\:\;\?\!\(\)\-\"\'\/\“\„\”\`\«\»\「\」]+\s*[\.\,\%\:\;\?\!\(\)\-\/\"\'\”\`\»\」]{0,5}(\/\w+)*[\/>]*)', sentences)
     # Remove all empty elements in array
     sentences = list(filter(None, sentences))
-    # ! print(sentences)
+    # print(sentences)
     # Links have numerous '.' inside of them but we shouldn't split them up, so here we are putting them back together.
     for link in contains_links:
         a_opening_index = None
