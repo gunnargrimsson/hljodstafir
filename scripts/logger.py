@@ -35,6 +35,6 @@ class Logger:
         Prints the log end and flushes the output buffer.
         """
         sys.stdout.reconfigure(encoding='utf8')
-        self.print_and_flush("\n\nPlaces of interest in the text:")
+        self.print_and_flush("Places of interest in the text:")
         for string in self.log_end:
             self.print_and_flush(string)
