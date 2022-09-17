@@ -107,6 +107,7 @@ if __name__ == "__main__":
         remove_files(foldername, finalname, logger, False)
         # Notifies the server that the process is complete
         # Waits for extra 1 second to allow all other messages to clear
+        logger.print_log_end()
         logger.print_and_flush("DONE", 1)
     except Exception as e:
         remove_files(foldername, finalname, logger)
