@@ -8,13 +8,14 @@ import FileInputButton from '../components/FileInputButton';
 import nProgress from 'nprogress';
 import { io } from 'socket.io-client';
 import { socketMessage } from '../interfaces';
-import useLocalStorage from '../hooks/useLocalStorage';
 import Messages from '../components/Messages';
-import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfaces/client';
+import { clientExtendedSocket, IFetchProps, IFile } from '../interfaces/client';
 import Notifications from '../components/Notifications';
 import Tooltip from '../components/Tooltip';
 import Container from '../components/Container';
 import { useSession } from 'next-auth/react';
+import { useCookies } from "react-cookie"
+import type { NextRequest, NextResponse } from 'next/server';
 // import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
@@ -29,7 +30,6 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	const [logs, setLogs] = useState<IFile[]>(mapLogs);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
 	const [canCloseMessages, setCanCloseMessages] = useState<boolean>(false);
-	const [client, setClient] = useLocalStorage<clientInfo>('clientInfo', {});
 	const [connected, setConnected] = useState<boolean>(false);
 	const [showing, setShowing] = useState<string>('files');
 	const [languageCode, setLanguageCode] = useState<string>('isl');
@@ -38,15 +38,17 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
 	const [longerAudio, setLongerAudio] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [client, setClient] = useCookies(["clientInfo"]);
 
 	const { data: session } = useSession();
 
 	const connectUser = async () => {
 		if (!connected) {
 			socket.auth = { clientEmail: session.user.email };
-			if (client['userID'] && client['sessionID']) {
-				console.log(client['userID'], 'found, connecting socket');
-				socket.auth.sessionID = client['sessionID'];
+			if (client?.clientInfo?.['userID'] && client?.clientInfo?.['sessionID']) {
+				console.log(client?.clientInfo?.['userID'], 'found, connecting socket');
+				socket.auth.sessionID = client.clientInfo['sessionID'];
 				socket.connect();
 				setConnected(true);
 			} else {
@@ -77,7 +79,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 		socket.on('user-connected', ({ sessionID, userID }: { sessionID: string; userID: string }) => {
 			socket.auth = { sessionID };
 			socket.userID = userID;
-			setClient({ sessionID, userID });
+			setClient("clientInfo", { sessionID, userID }, { path: "/" });
 		});
 	};
 
@@ -103,17 +105,19 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	useEffect(() => {
 		if (!session) {
 			console.log('no session');
+			setLoading(false);
 			return;
 		}
 		connectUser();
 		setupSockets();
+		setLoading(false);
 		return () => {
 			socket.off('ascanius-done');
 			socket.off('ascanius-error');
 			socket.off('ascanius-relay');
 			socket.off('user-connected');
 		};
-	}, [messages, files, session]);
+	}, [messages, files, session, client]);
 
 	const onChange = async (formData: FormData) => {
 		nProgress.configure({ showSpinner: true });
@@ -364,20 +368,29 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 					</div>
 				</>
 			)}
-			{!session && (
+			{!session && !loading ? (
 				<div className='h-full w-full bg-stone-200 flex flex-col place-items-center place-content-center text-5xl font-light'>
 					Please log in to use Hljóðstafir
 				</div>
+			) : (
+				<></>
 			)}
 		</Container>
 	);
 };
 
-export async function getServerSideProps() {
-	const { mapFiles } = await getFiles();
-	const { mapLogs } = await getLogs();
-	const appVersion = await getAppVersion();
-	return { props: { mapFiles, mapLogs, appVersion } };
+export async function getServerSideProps(context) {
+	const cookie = context?.req?.cookies?.['clientInfo'];
+
+	if (cookie) {
+		console.log('cookie', cookie);
+		const clientInfo = JSON.parse(cookie);
+		const { mapFiles } = await getFiles(clientInfo.userID);
+		const { mapLogs } = await getLogs();
+		const appVersion = await getAppVersion();
+		return { props: { mapFiles, mapLogs, appVersion } };
+	}
+	return { props: {} };
 }
 
 export default IndexPage;

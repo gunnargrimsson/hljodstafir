@@ -2,15 +2,17 @@ import fs from 'fs';
 import path from 'path';
 
 const handler = async (req: any, res: any) => {
-	const files = await getFiles();
+	const { userID } = req.query;
+	const files = await getFiles(userID);
 	const logs = await getLogs();
 	const version = await getAppVersion();
 	res.status(200).json({ files: files.mapFiles, logs: logs.mapLogs, version: version });
 };
 
-export const getFiles = async () => {
+export const getFiles = async (userID: string) => {
+	console.log(userID);
 	try {
-		const fileLoc = path.join('public', 'output');
+		const fileLoc = path.join('public', 'output', userID);
 		const files = fs.readdirSync(fileLoc);
 		const mapFiles = files.sort((a, b) => {
 			// get date from file property
