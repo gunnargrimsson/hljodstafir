@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { Server } from 'socket.io';
 import { IOptions, socketMessage } from '../../interfaces';
 
-const ascanius = (folderName: string, userID: string, io: Server, options: IOptions) => {
+const ascanius = (fileName: string, userID: string, io: Server, options: IOptions) => {
 	try {
 		console.log(options);
 		const stringOptions = {
@@ -13,7 +13,7 @@ const ascanius = (folderName: string, userID: string, io: Server, options: IOpti
 		};
 		const process = spawn('python', [
 			'main.py',
-			folderName,
+			fileName,
 			options.language,
 			stringOptions.ignoreAside,
 			stringOptions.adjustments,

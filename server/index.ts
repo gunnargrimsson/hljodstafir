@@ -7,6 +7,7 @@ import http from 'http';
 import { initIO } from './controllers/socket';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
 import { extendedSocket, IOptions } from '../interfaces';
 import dayjs from 'dayjs';
 
@@ -77,8 +78,8 @@ const ignoreUploadFolderNames = ['temp'];
 		let sessionStore = {};
 
 		io.use((socket: extendedSocket, next) => {
-			console.log(sessionStore);
 			const sessionID = socket.handshake.auth.sessionID;
+			const clientEmail = socket.handshake.auth.clientEmail;
 			if (sessionID) {
 				// find existing session
 				const session = sessionStore[sessionID];
@@ -90,7 +91,7 @@ const ignoreUploadFolderNames = ['temp'];
 			}
 			// create new session
 			socket.sessionID = uuidv4();
-			socket.userID = uuidv4();
+			socket.userID = uuidv5(clientEmail, process.env.UUID_NAMESPACE);
 			sessionStore[socket.sessionID] = { userID: socket.userID, sessionID: socket.sessionID };
 			next();
 		});
@@ -99,15 +100,20 @@ const ignoreUploadFolderNames = ['temp'];
 			await socket.join(socket.sessionID);
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
-			socket.on('ascanius', (folderName: string, options: IOptions) => {
+			socket.on('ascanius', (fileName: string, options: IOptions) => {
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
-				console.log("Running ascanius:", folderName);
-				ascanius(folderName, socket.sessionID, io, options);
+				console.log("Running ascanius:", fileName);
+				ascanius(fileName, socket.sessionID, io, options);
 			});
 
 			socket.on('disconnect', (data) => {
 				socket.emit('user-disconnect');
 				console.log('user disconnected');
+			});
+
+			socket.on('closed', (data) => {
+				socket.emit('user forcefully closed the connection');
+				console.log('user closed');
 			});
 		});
 

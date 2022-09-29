@@ -14,7 +14,7 @@ import { clientExtendedSocket, clientInfo, IFetchProps, IFile } from '../interfa
 import Notifications from '../components/Notifications';
 import Tooltip from '../components/Tooltip';
 import Container from '../components/Container';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 // import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
@@ -38,13 +38,15 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
 	const [longerAudio, setLongerAudio] = useState<boolean>(false);
+
 	const { data: session } = useSession();
 
 	const connectUser = async () => {
 		if (!connected) {
+			socket.auth = { clientEmail: session.user.email };
 			if (client['userID'] && client['sessionID']) {
 				console.log(client['userID'], 'found, connecting socket');
-				socket.auth = { sessionID: client['sessionID'] };
+				socket.auth.sessionID = client['sessionID'];
 				socket.connect();
 				setConnected(true);
 			} else {
@@ -53,6 +55,30 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 				setConnected(true);
 			}
 		}
+		return socket;
+	};
+
+	const setupSockets = async () => {
+		socket.on('ascanius-done', async (message: socketMessage) => {
+			setCanCloseMessages(true);
+			setMessages((messages) => [...messages, message]);
+			getFiles();
+		});
+		socket.on('ascanius-error', (message: socketMessage) => {
+			setCanCloseMessages(true);
+			setUploaded(false);
+			setError(message.message);
+			setMessages((messages) => [...messages, message]);
+			getFiles();
+		});
+		socket.on('ascanius-relay', (message: socketMessage) => {
+			setMessages((messages) => [...messages, message]);
+		});
+		socket.on('user-connected', ({ sessionID, userID }: { sessionID: string; userID: string }) => {
+			socket.auth = { sessionID };
+			socket.userID = userID;
+			setClient({ sessionID, userID });
+		});
 	};
 
 	const getFiles = async () => {
@@ -75,35 +101,19 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	};
 
 	useEffect(() => {
+		if (!session) {
+			console.log('no session');
+			return;
+		}
 		connectUser();
-		socket.on('ascanius-done', async (message: socketMessage) => {
-			setCanCloseMessages(true);
-			setMessages((messages) => [...messages, message]);
-			getFiles();
-		});
-		socket.on('ascanius-error', (message: socketMessage) => {
-			setCanCloseMessages(true);
-			setUploaded(false);
-			setError(message.message);
-			setMessages((messages) => [...messages, message]);
-			getFiles();
-		});
-		socket.on('ascanius-relay', (message: socketMessage) => {
-			setMessages((messages) => [...messages, message]);
-		});
-		socket.on('user-connected', ({ sessionID, userID }: { sessionID: string; userID: string }) => {
-			socket.auth = { sessionID };
-			socket.userID = userID;
-			setClient({ sessionID, userID });
-		});
-
+		setupSockets();
 		return () => {
 			socket.off('ascanius-done');
 			socket.off('ascanius-error');
 			socket.off('ascanius-relay');
 			socket.off('user-connected');
 		};
-	}, [messages, files]);
+	}, [messages, files, session]);
 
 	const onChange = async (formData: FormData) => {
 		nProgress.configure({ showSpinner: true });
@@ -125,7 +135,8 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 			setUploaded(true);
 			setError(null);
 			try {
-				socket.emit('ascanius', res.data.data[0].split('.')[0], {
+				const fileName = res.data.data[0].split('.')[0];
+				socket.emit('ascanius', fileName, {
 					language: languageCode,
 					ignoreAside: ignoreAside,
 					adjustment: adjusting ? adjustment : 0,
@@ -179,8 +190,8 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 						error={error}
 						setError={setError}
 					/>
-					<div className='bg-stone-200 h-full relative'>
-						<div className='absolute font-extralight text-xs opacity-50 p-2 right-0 select-none pointer-events-none'>
+					<div className='bg-stone-500 relative h-full flex flex-col'>
+						<div className='absolute font-light text-xs text-stone-700 p-2 right-0 select-none pointer-events-none'>
 							v {appVersion}
 						</div>
 						<div className='flex place-content-center justify-center'>
@@ -302,7 +313,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 							)}
 							<Messages messages={messages} canCloseMessages={canCloseMessages} handleCloseFeed={handleCloseFeed} />
 						</div>
-						<div className='bg-gray-300 flex flex-col pb-8'>
+						<div className='bg-stone-300 flex flex-col h-full'>
 							<div className='flex justify-center my-2'>
 								<button
 									onClick={() => onShowClick('files')}
@@ -353,13 +364,11 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 					</div>
 				</>
 			)}
-			{
-				!session && (
-					<div className='h-full w-full bg-stone-200 flex flex-col place-items-center place-content-center text-5xl font-light'>
-						Please log in to use Hljóðstafir
-					</div>
-				)
-			}
+			{!session && (
+				<div className='h-full w-full bg-stone-200 flex flex-col place-items-center place-content-center text-5xl font-light'>
+					Please log in to use Hljóðstafir
+				</div>
+			)}
 		</Container>
 	);
 };
