@@ -4,9 +4,9 @@ import Navbar from './navigation/Navbar';
 const Container = ({ children }: { children: ReactNode }) => {
 
 	return (
-		<div className='flex flex-col h-screen'>
+		<div className='flex flex-col min-h-screen'>
 			<Navbar />
-			<main className='mb-auto relative min-h-[calc(100vh-5rem)]'>{children}</main>
+			{children}
 		</div>
 	);
 };

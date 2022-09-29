@@ -187,6 +187,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 		<Container>
 			{session && (
 				<>
+					<main className='bg-stone-500 relative h-full flex flex-col mb-auto min-h-[calc(100vh-5rem)]'>
 					<Notifications
 						uploaded={uploaded}
 						setUploaded={setUploaded}
@@ -194,11 +195,10 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 						error={error}
 						setError={setError}
 					/>
-					<div className='bg-stone-500 relative h-full flex flex-col'>
 						<div className='absolute font-light text-xs text-stone-700 p-2 right-0 select-none pointer-events-none'>
 							v {appVersion}
 						</div>
-						<div className='flex place-content-center justify-center'>
+						<div className='flex h-full place-content-center justify-center'>
 							{messages.length === 0 && (
 								<div className='px-5 my-10 py-4 bg-white rounded-sm flex flex-col'>
 									<div className='w-full text-center font-semibold text-2xl mt-2 mb-4'>Upload</div>
@@ -317,7 +317,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 							)}
 							<Messages messages={messages} canCloseMessages={canCloseMessages} handleCloseFeed={handleCloseFeed} />
 						</div>
-						<div className='bg-stone-300 flex flex-col h-full'>
+						<div className='bg-stone-300 flex flex-col flex-1 h-full'>
 							<div className='flex justify-center my-2'>
 								<button
 									onClick={() => onShowClick('files')}
@@ -365,7 +365,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 									</div>
 								))}
 						</div>
-					</div>
+					</main>
 				</>
 			)}
 			{!session && !loading ? (

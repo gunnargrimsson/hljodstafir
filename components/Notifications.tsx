@@ -12,7 +12,7 @@ interface NotificationProps {
 
 const Notifications = ({ uploaded, setUploaded, uploadMessage, error, setError} : NotificationProps) => {
   return (
-    <div>
+    <div className='absolute top-2 right-2 max-w-xs w-1/2 z-50'>
       {uploaded && (
 				<Notification onClose={() => setUploaded(false)} icon={<Check size={18} />} color='teal' title='Upload Status'>
 					{uploadMessage}
