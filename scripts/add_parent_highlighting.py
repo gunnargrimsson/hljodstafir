@@ -2,7 +2,7 @@ from scripts.logger import Logger
 
 
 def add_parent_highlighting(foldername: str, location: str, text_files: list, logger: Logger):
-    """Add parent highlighting script and css to all xhtml files in book."""
+    """Add parental highlighting script and css to all xhtml files in book."""
     # get the css file and javascript files in /utilities
     css = open('./utilities/highlightObserver.css',
                'r', encoding='utf8').read()
@@ -26,4 +26,4 @@ def add_parent_highlighting(foldername: str, location: str, text_files: list, lo
     with open('./public/uploads/{}/{}/package.opf'.format(foldername, location), 'w', encoding='utf8') as f:
         f.write(text.replace(
             '</manifest>', '<item href="highlightObserver.css" id="highlightObserver.css" media-type="text/css"/>\n<item href="highlightObserver.js" id="highlightObserver.js" media-type="application/javascript"/>\n</manifest>'))
-    logger.print_and_flush('Added parent highlighting to book.')
+    logger.print_and_flush('Added parental highlighting to book.')

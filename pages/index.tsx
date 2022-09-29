@@ -296,7 +296,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 						)}
 						<Messages messages={messages} canCloseMessages={canCloseMessages} handleCloseFeed={handleCloseFeed} />
 					</div>
-					<div className='bg-gray-300 flex flex-col'>
+					<div className='bg-gray-300 flex flex-col pb-8'>
 						<div className='flex justify-center my-2'>
 							<button
 								onClick={() => onShowClick('files')}

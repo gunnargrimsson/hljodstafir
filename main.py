@@ -20,7 +20,7 @@ import sys
 
 if __name__ == "__main__":
     check_if_folders_exists()
-    # Currently if the computer running the script is not a linux machine the script will stall on files longer than 30~ minutes.
+    # Currently if the computer running the script is not a linux machine the script might stall on files longer than 30~ minutes.
     mp3_max_minutes_length = 30
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
@@ -89,8 +89,11 @@ if __name__ == "__main__":
         cleaned = clean(foldername, location, text_files, logger)
         if (cleaned == False):
             raise Exception("Error occurred while cleaning text files.")
-        check_empty_files(foldername, location,
-                          text_files, audio_files, logger)
+        skip_files = check_empty_files(
+            foldername, location, text_files, audio_files, logger)
+        # remove empty files from the list of files to be processed
+        text_files = [x for x in text_files if x not in skip_files]
+        audio_files = [x for x in audio_files if x not in skip_files]
         # Aeneas force alignment of audio and text
         force_align(audio_files, text_files, language_code,
                     foldername, location, logger)
