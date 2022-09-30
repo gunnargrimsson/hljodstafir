@@ -70,12 +70,12 @@ const ignoreUploadFolderNames = ['temp'];
 				res.status(200).json({ success: true, message: 'File deleted' });
 			} catch (error) {
 				console.error('File not found');
-				res.status(500).json({ success: false, message: error.message });
+				res.status(500).json({ success: false, message: 'File not found' });
 			}
 		});
 
 		// temp session database
-		let sessionStore = {};
+		let sessionStore: any = {};
 
 		io.use((socket: extendedSocket, next) => {
 			const sessionID = socket.handshake.auth.sessionID;
@@ -91,16 +91,28 @@ const ignoreUploadFolderNames = ['temp'];
 			}
 			// create new session
 			socket.sessionID = uuidv4();
-			socket.userID = uuidv5(clientEmail, process.env.UUID_NAMESPACE);
+			const namespace = process.env.NEXTAUTH_UUID_NAMESPACE;
+			if (namespace) {
+				const userID = uuidv5(clientEmail, namespace);
+				socket.userID = userID; 
+			}
 			sessionStore[socket.sessionID] = { userID: socket.userID, sessionID: socket.sessionID };
 			next();
 		});
 
 		io.on('connection', async (socket: extendedSocket) => {
+			if (!socket.sessionID) {
+				console.log('no session id');
+				return;
+			}
 			await socket.join(socket.sessionID);
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
 			socket.on('ascanius', (fileName: string, options: IOptions) => {
+				if (!socket.sessionID) {
+					console.log('no session id');
+					return;
+				}
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
 				console.log("Running ascanius:", fileName);
 				ascanius(fileName, socket.sessionID, io, options);

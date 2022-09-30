@@ -7,7 +7,7 @@ interface NotificationProps {
   setUploaded: React.Dispatch<React.SetStateAction<boolean>>;
   uploadMessage: string;
   error: string | null;
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setError: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 const Notifications = ({ uploaded, setUploaded, uploadMessage, error, setError} : NotificationProps) => {
@@ -19,7 +19,7 @@ const Notifications = ({ uploaded, setUploaded, uploadMessage, error, setError} 
 				</Notification>
 			)}
 			{error && (
-				<Notification onClose={() => setError(null)} icon={<X size={18} />} color='red' title='Upload Status'>
+				<Notification onClose={() => setError(undefined)} icon={<X size={18} />} color='red' title='Upload Status'>
 					{error}
 				</Notification>
 			)}

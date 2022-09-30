@@ -18,8 +18,8 @@ export interface socketMessage {
 }
 
 export interface extendedSocket extends Socket {
-	sessionID: string;
-	userID: string;
+	sessionID?: string;
+	userID?: string;
 }
 
 export interface IOptions {

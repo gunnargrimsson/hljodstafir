@@ -15,17 +15,21 @@ import Tooltip from '../components/Tooltip';
 import Container from '../components/Container';
 import { useSession } from 'next-auth/react';
 import { useCookies } from "react-cookie"
-import type { NextRequest, NextResponse } from 'next/server';
+import { GetServerSidePropsContext } from 'next';
 // import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
 
-const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
-	const router = useRouter();
-	const redirected = router.query.redirected;
+interface IProps {
+	mapFiles: IFile[];
+	mapLogs: IFile[];
+	appVersion: string;
+}
+
+const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 	const [uploaded, setUploaded] = useState<boolean>(false);
-	const [error, setError] = useState<string>(null);
-	const [uploadMessage, setUploadMessage] = useState<string>(null);
+	const [error, setError] = useState<string>();
+	const [uploadMessage, setUploadMessage] = useState<string>();
 	const [files, setFiles] = useState<IFile[]>(mapFiles);
 	const [logs, setLogs] = useState<IFile[]>(mapLogs);
 	const [messages, setMessages] = useState<socketMessage[]>([]);
@@ -45,7 +49,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 
 	const connectUser = async () => {
 		if (!connected) {
-			socket.auth = { clientEmail: session.user.email };
+			socket.auth = { clientEmail: session?.user?.email };
 			if (client?.clientInfo?.['userID'] && client?.clientInfo?.['sessionID']) {
 				console.log(client?.clientInfo?.['userID'], 'found, connecting socket');
 				socket.auth.sessionID = client.clientInfo['sessionID'];
@@ -84,14 +88,15 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	};
 
 	const getFiles = async () => {
-		const fetchFiles: IFetchProps = await axios.get('/api/files');
+		if (!socket.userID) return;
+		const fetchFiles: IFetchProps = await axios.get('/api/files', { params: { userID: socket.userID }});
 		if (fetchFiles?.data) {
 			setFiles(fetchFiles.data.files);
 			setLogs(fetchFiles.data.logs);
 		}
 	};
 
-	const deleteFile = async (file) => {
+	const deleteFile = async (file: any) => {
 		await axios
 			.post('/api/delete/', { file })
 			.then(() => {
@@ -109,6 +114,9 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 			return;
 		}
 		connectUser();
+		if (!files) {
+			getFiles();
+		}
 		setupSockets();
 		setLoading(false);
 		return () => {
@@ -127,7 +135,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},
-			onUploadProgress: (progressEvent) => {
+			onUploadProgress: (progressEvent: any) => {
 				const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
 				console.log(percentCompleted);
 			},
@@ -137,7 +145,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 
 		if (res.status === 200) {
 			setUploaded(true);
-			setError(null);
+			setError(undefined);
 			try {
 				const fileName = res.data.data[0].split('.')[0];
 				socket.emit('ascanius', fileName, {
@@ -156,7 +164,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 			nProgress.done();
 		} else {
 			setError(res.data.message);
-			setUploadMessage(null);
+			setUploadMessage(undefined);
 		}
 	};
 
@@ -188,13 +196,14 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 			{session && (
 				<>
 					<main className='bg-stone-500 relative h-full flex flex-col mb-auto min-h-[calc(100vh-5rem)]'>
+					{uploadMessage && error && setError &&
 					<Notifications
 						uploaded={uploaded}
 						setUploaded={setUploaded}
 						uploadMessage={uploadMessage}
 						error={error}
 						setError={setError}
-					/>
+					/>}
 						<div className='absolute font-light text-xs text-stone-700 p-2 right-0 select-none pointer-events-none'>
 							v {appVersion}
 						</div>
@@ -369,7 +378,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 				</>
 			)}
 			{!session && !loading ? (
-				<div className='h-full w-full bg-stone-200 flex flex-col place-items-center place-content-center text-5xl font-light'>
+				<div className='h-full w-full bg-stone-200 flex flex-1 flex-col place-items-center place-content-center text-5xl font-light'>
 					Please log in to use Hljóðstafir
 				</div>
 			) : (
@@ -379,9 +388,9 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }) => {
 	);
 };
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
 	const cookie = context?.req?.cookies?.['clientInfo'];
-
+	console.log("cookie", cookie);
 	if (cookie) {
 		console.log('cookie', cookie);
 		const clientInfo = JSON.parse(cookie);
@@ -390,7 +399,7 @@ export async function getServerSideProps(context) {
 		const appVersion = await getAppVersion();
 		return { props: { mapFiles, mapLogs, appVersion } };
 	}
-	return { props: {} };
+	return { props: { mapFiles: null, mapLogs: null, appVersion: null } };
 }
 
 export default IndexPage;

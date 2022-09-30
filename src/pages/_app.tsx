@@ -3,6 +3,9 @@ import nProgress from 'nprogress';
 import Router from 'next/router';
 import '../styles/nprogress.css';
 import { SessionProvider } from "next-auth/react"
+import { Session } from 'next-auth';
+import type { AppProps } from 'next/app';
+import { extendedSocket } from '../interfaces';
 
 nProgress.configure({
   minimum: 0.3,
@@ -15,8 +18,10 @@ Router.events.on('routeChangeStart', () => nProgress.start());
 Router.events.on('routeChangeComplete', () => nProgress.done());
 Router.events.on('routeChangeError', () => nProgress.done());
 
-function MyApp({ Component, session, pageProps }) {
-  return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
+interface InitialProps extends AppProps {
+  session: Session;
 }
 
-export default MyApp
+export default function MyApp({ Component, pageProps, session }: InitialProps) {
+  return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
+}

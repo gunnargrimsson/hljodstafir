@@ -12,7 +12,7 @@ const handler = async (req: any, res: any) => {
 export const getFiles = async (userID: string) => {
 	console.log(userID);
 	try {
-		const fileLoc = path.join('public', 'output', userID);
+		const fileLoc = path.join('src', 'public', 'output', userID);
 		const files = fs.readdirSync(fileLoc);
 		const mapFiles = files.sort((a, b) => {
 			// get date from file property
@@ -37,7 +37,7 @@ export const getFiles = async (userID: string) => {
 };
 
 export const getLogs = async () => {
-	const fileLoc = path.join('public', 'logs');
+	const fileLoc = path.join('src', 'public', 'logs');
 	const files = fs.readdirSync(fileLoc);
 	const mapLogs = files.sort((a, b) => {
 		// get date from file property
@@ -58,7 +58,7 @@ export const getLogs = async () => {
 };
 
 export const getAppVersion = async () => {
-	return process.env.REACT_APP_VERSION;
+	return process.env.NEXT_PUBLIC_VERSION;
 }
 
 
