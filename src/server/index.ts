@@ -17,6 +17,8 @@ const handle = nextApp.getRequestHandler();
 const port = process.env.PORT || 3000;
 const ignoreUploadFolderNames = ['temp'];
 
+// TODO: Add a way to delete files from the server on a schedule (cron job) (uploads then users old files)
+
 (async () => {
 	try {
 		const timeRegex = /[\.\-\:]/g;
