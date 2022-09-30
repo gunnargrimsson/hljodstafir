@@ -2,6 +2,7 @@ import re
 import os
 from bs4 import BeautifulSoup
 from scripts.logger import Logger
+from config import Config
 
 def clean(foldername, location, text_files, logger: Logger):
     """Cleans the text files for aeneas to correctly force align text and audio."""
@@ -39,8 +40,8 @@ def clean(foldername, location, text_files, logger: Logger):
             # format lines a string to be printed
             lines = '\n'.join(lines)
             logger.print_and_flush(
-                "ERROR: Text outside markup in {}".format(text_file))
-            logger.print_and_flush("ERROR (Problem text):\n" + lines)
+                f"ERROR: Text outside markup in {text_file}")
+            logger.print_and_flush(f"ERROR (Problem text):\n{lines}")
             errors.append({
                 "error": "Text outside markup",
                 "text": lines,
@@ -50,17 +51,17 @@ def clean(foldername, location, text_files, logger: Logger):
     try:
         for id, text_file in enumerate(text_files):
             current_text_file = text_file
-            with open('././public/uploads/{}/{}{}'.format(foldername, location, text_file), 'r', encoding='utf8') as f:
+            with open(f'./{Config.upload_folder}{foldername}/{location}{text_file}', 'r', encoding='utf8') as f:
                 text = f.read()
                 soup = BeautifulSoup(text, 'html5lib')
                 # Check if there is text outside of the markup (in body, i.e not inside of a p tag or h1 tag)
                 check_for_text_outside_markup(text_file, text, logger)
                 h = soup.find_all(re.compile('h1|h2|h3|h4|h5|span'), id=has_id_or_not, class_=is_sentence_or_h1, lang=None, style=None, rel=None, recursive=True)
                 # make a directory
-                if not os.path.exists('././public/uploads/{}/{}clean'.format(foldername, location)):
-                    os.makedirs('././public/uploads/{}/{}clean'.format(foldername, location))
+                if not os.path.exists(f'./{Config.upload_folder}{foldername}/{location}clean'):
+                    os.makedirs(f'./{Config.upload_folder}{foldername}/{location}clean')
 
-                with open('././public/uploads/{}/{}clean/{}'.format(foldername, location, text_file), 'w+', encoding='utf8') as f:
+                with open(f'./{Config.upload_folder}{foldername}/{location}clean/{text_file}', 'w+', encoding='utf8') as f:
                     f.write(encoding)
                     for i in h:
                         if i.text is not None:
@@ -69,5 +70,5 @@ def clean(foldername, location, text_files, logger: Logger):
             return False
         return True
     except Exception as e:
-        logger.print_and_flush('ERROR: Cleaning file {} failed with error: {}'.format(current_text_file, e))
+        logger.print_and_flush(f'ERROR: Cleaning file {current_text_file} failed with error: {e}')
         return False

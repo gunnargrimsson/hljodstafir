@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from scripts.logger import Logger
-
+from config import Config
 
 def check_empty_files(foldername: str, location: str, text_files: list, audio_files: list, logger: Logger):
     current_text_file = None
@@ -21,7 +21,7 @@ def check_empty_files(foldername: str, location: str, text_files: list, audio_fi
         for id, text_file in enumerate(text_files):
             current_text_file = text_file
             current_audio_file = audio_files[id]
-            with open('././public/uploads/{}/{}/clean/{}'.format(foldername, location, current_text_file), 'r', encoding='utf8') as f:
+            with open(f'./{Config.upload_folder}{foldername}/{location}/clean/{current_text_file}', 'r', encoding='utf8') as f:
                 text = f.read()
                 skip_file = check_if_empty_text_but_audio_exists(current_text_file, current_audio_file, text, logger)
                 if skip_file:
@@ -30,5 +30,5 @@ def check_empty_files(foldername: str, location: str, text_files: list, audio_fi
         return skip_files
     except Exception as e:
         logger.print_and_flush(
-            'ERROR: Error while processing {} and {}, failed with error: {}'.format(current_text_file, current_audio_file, e))
+            'ERROR: Error while processing {current_text_file} and {current_audio_file}, failed with error: {e}')
         return skip_files

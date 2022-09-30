@@ -5,6 +5,7 @@ import math
 import warnings
 import sys
 from scripts.logger import Logger
+from config import Config
 
 # Ignore URL warnings
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
@@ -76,7 +77,7 @@ def markup(foldername: str, location: str, text_files: list, ignore_aside: bool,
     try:
         for text_file in text_files:
             current_text_file = text_file
-            with open('././public/uploads/{}/{}{}'.format(foldername, location, text_file), 'r', encoding='utf8') as f:
+            with open(f'./{Config.upload_folder}{foldername}/{location}{text_file}', 'r', encoding='utf8') as f:
                 text = f.read()
 
             # Turn it into soup
@@ -142,7 +143,7 @@ def markup(foldername: str, location: str, text_files: list, ignore_aside: bool,
                             n_suffix += 1
 
                 # Write out processed text
-                with open('././public/uploads/{}/{}{}'.format(foldername, location, text_file), 'w', encoding='utf8') as f:
+                with open(f'./{Config.upload_folder}{foldername}/{location}{text_file}', 'w', encoding='utf8') as f:
                     f.write(soup.decode("utf8"))
     except Exception as e:
         logger.print_and_flush(

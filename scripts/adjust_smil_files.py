@@ -1,13 +1,14 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from scripts.logger import Logger
+from config import Config
 
 def adjust_package_opf_smil_durations(foldername: str, location: str, smil_file_end_durations: list):
     """
         Adjusts the package.opf file to match the new smil file durations.
     """
     # read package.opf file
-    with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'r', encoding='utf8') as f:
+    with open(f'{Config.upload_folder}{foldername}/{location}package.opf', 'r', encoding='utf8') as f:
         package_opf = f.read()
         # turn to soup
         soup = BeautifulSoup(package_opf, 'xml')
@@ -37,7 +38,7 @@ def adjust_package_opf_smil_durations(foldername: str, location: str, smil_file_
         meta_tags[-1].string.replace_with(total_duration_str.strip())
         remove_extra_colon(soup, 'package')
         # write the new package.opf file
-        with open('./public/uploads/{}/{}package.opf'.format(foldername, location), 'w', encoding='utf8') as newf:
+        with open(f'{Config.upload_folder}{foldername}/{location}package.opf', 'w', encoding='utf8') as newf:
             newf.write(str(soup))
 
 
@@ -46,7 +47,7 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
         Adjusts the smil file based on some threshold that can be set by the user, defaults to 100ms.
     """
     newClipEnd = '00:00:00.000'
-    with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'r', encoding='utf8') as f:
+    with open(f'./{Config.upload_folder}{foldername}/{location}{smil_file}', 'r', encoding='utf8') as f:
         smil = f.read()
         # turn to soup
         soup = BeautifulSoup(smil, 'xml')
@@ -94,7 +95,7 @@ def adjust_smil_file(smil_file: str, foldername: str, location: str, logger: Log
         # remove xml header
         soup.is_xml = False
         # write the new smil file
-        with open('././public/uploads/{}/{}{}'.format(foldername, location, smil_file), 'w', encoding='utf8') as newf:
+        with open(f'./{Config.upload_folder}{foldername}/{location}{smil_file}', 'w', encoding='utf8') as newf:
             newf.write(soup.decode('utf8'))
     return newClipEnd
 

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from config import Config
 
 ignore_file_list = ['toc.xhtml', 'nav.xhtml']
 
@@ -66,6 +67,6 @@ def get_file_content(file_name: str, foldername: str, location: str):
     """
       Returns the content of a file.
     """
-    with open("././public/uploads/{}/{}/{}".format(foldername, location, file_name), 'r', encoding='utf8') as file:
+    with open(f"./{Config.upload_folder}{foldername}/{location}/{file_name}", 'r', encoding='utf8') as file:
         file_content = file.read()
     return file_content

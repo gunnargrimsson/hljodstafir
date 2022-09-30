@@ -2,14 +2,14 @@ import { spawn } from 'child_process';
 import { Server } from 'socket.io';
 import { IOptions, socketMessage } from '../../interfaces';
 
-const ascanius = (fileName: string, userID: string, io: Server, options: IOptions) => {
+const ascanius = (fileName: string, userID: string, sessionID: string, io: Server, options: IOptions) => {
 	try {
-		console.log(options);
 		const stringOptions = {
 			ignoreAside: options.ignoreAside.toString(),
 			adjustments: options.adjustment.toString(),
 			parentHighlighting: options.parentHighlighting.toString(),
 			longerAudio: options.longerAudio.toString(),
+			userID: userID,
 		};
 		const process = spawn('python', [
 			'main.py',
@@ -18,7 +18,8 @@ const ascanius = (fileName: string, userID: string, io: Server, options: IOption
 			stringOptions.ignoreAside,
 			stringOptions.adjustments,
 			stringOptions.parentHighlighting,
-			stringOptions.longerAudio
+			stringOptions.longerAudio,
+			stringOptions.userID,
 		]);
 		// process spawn with utf 8 encoding
 		process.stdout.setEncoding('utf8');
@@ -26,21 +27,20 @@ const ascanius = (fileName: string, userID: string, io: Server, options: IOption
 			const hasError = data.toString().toLowerCase().includes('error');
 			const hasWarning = data.toString().toLowerCase().includes('warning');
 			const done = data.toString().toLowerCase().includes('done');
-			console.log(data.toString());
 			if (done) {
 				const doneMessage: socketMessage = {
 					message: 'Finished Processing',
 					delivered: new Date().toString(),
 					highlight: false,
 				};
-				io.to(userID).emit('ascanius-done', doneMessage);
+				io.to(sessionID).emit('ascanius-done', doneMessage);
 			} else {
 				const message: socketMessage = {
 					message: data.toString(),
 					delivered: new Date().toISOString(),
 					highlight: hasError ? 'error' : hasWarning ? 'warning' : false,
 				};
-				io.to(userID).emit('ascanius-relay', message);
+				io.to(sessionID).emit('ascanius-relay', message);
 			}
 		});
 		process.stderr.setEncoding('utf8');
@@ -51,7 +51,7 @@ const ascanius = (fileName: string, userID: string, io: Server, options: IOption
 				delivered: new Date().toISOString(),
 				highlight: 'error',
 			};
-			io.to(userID).emit('ascanius-error', message);
+			io.to(sessionID).emit('ascanius-error', message);
 		});
 	} catch (error) {
 		console.log('We can delete the file here as well?');

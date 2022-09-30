@@ -2,7 +2,6 @@ from datetime import datetime
 from scripts.adjust_smil_files import adjust_smil_files
 from scripts.check_audio_length import check_audio_length
 from scripts.check_empty_files import check_empty_files
-from scripts.logger import Logger
 from scripts.markup import markup
 from scripts.clean import clean
 from scripts.force_align import force_align
@@ -16,34 +15,39 @@ from scripts.check_folders import check_if_folders_exists
 from scripts.check_meta_tags import check_meta_tags
 from scripts.aeneas_languages import LANGUAGE_CODE_TO_HUMAN as languages
 from scripts.add_parent_highlighting import add_parent_highlighting
+from scripts.logger import Logger
+from config import Config
 import sys
 
 if __name__ == "__main__":
-    check_if_folders_exists()
     # Currently if the computer running the script is not a linux machine the script might stall on files longer than 30~ minutes.
     mp3_max_minutes_length = 30
+    foldername = sys.argv[1]
     language_code = sys.argv[2] if len(sys.argv) >= 3 else 'isl'
     ignore_aside = sys.argv[3] == "true" if len(sys.argv) >= 4 else False
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
     parent_highlighting = sys.argv[5] == "true" if len(
         sys.argv) >= 6 else False
     allow_longer_mp3 = sys.argv[6] == "true" if len(sys.argv) >= 7 else False
-    foldername = sys.argv[1]
-    finalname = check_epub_exists(foldername.split('_remove-timestamp_')[1])
-    logger = Logger('./public/logs/{}-{}.log'.format(finalname,
-                    datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
-    error_has_been_logged = False
+    userID = sys.argv[7] if len(sys.argv) >= 8 else None
     try:
-        logger.print_and_flush("Processing: {}".format(finalname))
-        logger.print_and_flush("Language: {}".format(
-            languages[language_code.upper()]))
+        if (userID == None):
+            raise Exception("No userID was provided")
+        Config.userID = userID
+        Config.folder_name = foldername
+        Config.upload_folder, Config.output_folder, Config.logs_folder = check_if_folders_exists(
+            Config.userID)
+        Config.final_name = check_epub_exists()
+        logger = Logger(
+            f'{Config.logs_folder}{Config.final_name}-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.log')
+        error_has_been_logged = False
+        logger.print_and_flush(f"Processing: {Config.final_name}")
+        logger.print_and_flush(f"Language: {languages[language_code.upper()]}")
         if language_code.upper() not in languages:
             logger.print_and_flush('WARNING: Language not supported')
-        logger.print_and_flush(
-            "Ignore Aside/Image Text: {}".format(ignore_aside))
-        extract_epub(foldername)
-
-        package_opf, location = get_package_opf(foldername, logger)
+        logger.print_and_flush(f"Ignore Aside/Image Text: {ignore_aside}")
+        extract_epub()
+        package_opf, location = get_package_opf(logger)
         if not package_opf:
             raise Exception(
                 "Could not find package.opf, Not a valid EPUB File.\nPlease fix, refresh and try again.")
@@ -68,8 +72,8 @@ if __name__ == "__main__":
         if smil_files is None:
             raise Exception("Could not find smil files in package.opf")
 
-        logger.print_and_flush("Audio Files: {}".format(len(audio_files)))
-        logger.print_and_flush("Text Files: {}".format(len(text_files)), 0.1)
+        logger.print_and_flush(f"Audio Files: {len(audio_files)}")
+        logger.print_and_flush(f"Text Files: {len(text_files)}", 0.1)
 
         segmentation_correct = len(audio_files) == len(text_files)
         if not segmentation_correct:
@@ -77,8 +81,8 @@ if __name__ == "__main__":
                 "ERROR: Number of mp3 files and number of text segments do not match.")
             logger.print_and_flush(
                 "ERROR: List of found text and audio files can be found in the log file.", 0.1)
-            logger.log("Audio Files: \n{}".format(audio_files))
-            logger.log("Text Files: \n{}".format(text_files))
+            logger.log(f"Audio Files: \n{audio_files}")
+            logger.log(f"Text Files: \n{text_files}")
             error_has_been_logged = True
             raise Exception(
                 "Number of mp3 files and number of text segments do not match.")
@@ -105,15 +109,15 @@ if __name__ == "__main__":
         # Remove clean files after aeneas processes them
         remove_clean_files(foldername, location, logger)
         # Zip the epub back up
-        zip_epub(foldername, finalname, logger)
+        zip_epub(logger)
         # Remove the extra files from the server (Doesn't log any exceptions)
-        remove_files(foldername, finalname, logger, False)
+        remove_files(logger, False)
         # Notifies the server that the process is complete
         # Waits for extra 1 second to allow all other messages to clear
         logger.print_log_end()
         logger.print_and_flush("DONE", 1)
     except Exception as e:
-        remove_files(foldername, finalname, logger)
+        remove_files(logger)
         if not error_has_been_logged:
-            logger.print_and_flush("ERROR: {}".format(e))
+            logger.print_and_flush(f"ERROR: {e}")
         raise

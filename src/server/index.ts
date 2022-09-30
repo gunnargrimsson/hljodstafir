@@ -18,8 +18,6 @@ const port = process.env.PORT || 3000;
 const ignoreUploadFolderNames = ['temp'];
 
 // TODO: Add a way to delete files from the server on a schedule (cron job) (uploads then users old files)
-// TODO: Change logs to be unique per user
-// TODO: Change the python end points to the public folders
 
 (async () => {
 	try {
@@ -33,9 +31,8 @@ const ignoreUploadFolderNames = ['temp'];
 
 		const upload = multer({
 			storage: multer.diskStorage({
-				destination: './public/uploads',
+				destination: './src/public/uploads',
 				filename: (req, file, cb) => {
-					console.log(file);
 					cb(null, `${dayjs().toISOString().replaceAll(timeRegex, '_')}_remove-timestamp_${file.originalname}`);
 				},
 			}),
@@ -45,7 +42,7 @@ const ignoreUploadFolderNames = ['temp'];
 		const uploadFiles = upload.array('files');
 
 		app.post('/api/upload', uploadFiles, async (req, res) => {
-			const filenames = fs.readdirSync('./public/uploads');
+			const filenames = fs.readdirSync('./src/public/uploads');
 			// ignore upload folder names
 			const filteredFilenames = filenames.filter((filename) => !ignoreUploadFolderNames.includes(filename));
 			// sort files by upload time
@@ -60,17 +57,17 @@ const ignoreUploadFolderNames = ['temp'];
 		});
 
 		// download file
-		app.get('/api/download/:location/:file', async (req, res) => {
+		app.get('/api/download/output/:location/:file', async (req, res) => {
 			const file = req.params.file;
 			const location = req.params.location;
-			res.download(`./public/${location}/${file}`);
+			res.download(`./src/public/output/${location}/${file}`);
 			res.status(200);
 		});
 
 		app.post('/api/delete', async (req, res) => {
 			const file = req.body.file;
 			try {
-				fs.unlinkSync(`./public/${file}`);
+				fs.unlinkSync(`./src/public/${file}`);
 				res.status(200).json({ success: true, message: 'File deleted' });
 			} catch (error) {
 				console.error('File not found');
@@ -106,20 +103,19 @@ const ignoreUploadFolderNames = ['temp'];
 
 		io.on('connection', async (socket: extendedSocket) => {
 			if (!socket.sessionID) {
-				console.log('no session id');
+				console.error('no session id');
 				return;
 			}
 			await socket.join(socket.sessionID);
 			socket.emit('user-connected', { sessionID: socket.sessionID, userID: socket.userID });
 
 			socket.on('ascanius', (fileName: string, options: IOptions) => {
-				if (!socket.sessionID) {
-					console.log('no session id');
+				if (!socket.userID || !socket.sessionID) {
+					console.error('no user id or session id');
 					return;
 				}
 				// Need to send the info to "sender" so we throw him the io reference (socket cant deliver)
-				console.log("Running ascanius:", fileName);
-				ascanius(fileName, socket.sessionID, io, options);
+				ascanius(fileName, socket.userID, socket.sessionID, io, options);
 			});
 
 			socket.on('disconnect', (data) => {

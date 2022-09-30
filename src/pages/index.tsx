@@ -51,12 +51,10 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 		if (!connected) {
 			socket.auth = { clientEmail: session?.user?.email };
 			if (client?.clientInfo?.['userID'] && client?.clientInfo?.['sessionID']) {
-				console.log(client?.clientInfo?.['userID'], 'found, connecting socket');
 				socket.auth.sessionID = client.clientInfo['sessionID'];
 				socket.connect();
 				setConnected(true);
 			} else {
-				console.log('no user found, connecting new socket');
 				socket.connect();
 				setConnected(true);
 			}
@@ -109,7 +107,6 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 
 	useEffect(() => {
 		if (!session) {
-			console.log('no session');
 			setLoading(false);
 			return;
 		}
@@ -137,7 +134,6 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 			},
 			onUploadProgress: (progressEvent: any) => {
 				const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-				console.log(percentCompleted);
 			},
 		};
 
@@ -390,12 +386,10 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 	const cookie = context?.req?.cookies?.['clientInfo'];
-	console.log("cookie", cookie);
 	if (cookie) {
-		console.log('cookie', cookie);
 		const clientInfo = JSON.parse(cookie);
 		const { mapFiles } = await getFiles(clientInfo.userID);
-		const { mapLogs } = await getLogs();
+		const { mapLogs } = await getLogs(clientInfo.userID);
 		const appVersion = await getAppVersion();
 		return { props: { mapFiles, mapLogs, appVersion } };
 	}

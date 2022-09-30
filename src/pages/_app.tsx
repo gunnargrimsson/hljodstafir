@@ -5,7 +5,6 @@ import '../styles/nprogress.css';
 import { SessionProvider } from "next-auth/react"
 import { Session } from 'next-auth';
 import type { AppProps } from 'next/app';
-import { extendedSocket } from '../interfaces';
 
 nProgress.configure({
   minimum: 0.3,
