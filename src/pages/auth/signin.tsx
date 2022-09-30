@@ -19,7 +19,7 @@ const signin = ({
 						className='font-bold bg-white px-3 py-1 rounded-sm ring-1 ring-black hover:text-white hover:bg-black'
 						onClick={() => signIn(provider.id, { callbackUrl: router.query.callbackUrl.toString() })}
 					>
-						Sign in with {provider.name} or {provider.id}
+						Sign in with {provider.name}
 					</button>
 				</div>
 			))}
