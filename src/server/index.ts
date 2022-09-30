@@ -18,6 +18,8 @@ const port = process.env.PORT || 3000;
 const ignoreUploadFolderNames = ['temp'];
 
 // TODO: Add a way to delete files from the server on a schedule (cron job) (uploads then users old files)
+// TODO: Change logs to be unique per user
+// TODO: Change the python end points to the public folders
 
 (async () => {
 	try {
