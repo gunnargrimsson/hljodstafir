@@ -6,26 +6,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     python-is-python3 \
     curl \
-    git
+    git \
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs \
     build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    node --version && \ 
+    node --version && \
     npm --version && \
     npm install --global yarn
+
+# RUN apt-get install –y nginx
 
 WORKDIR /app
 COPY . .
 
 RUN bash install_dependencies.sh
 
-RUN python -m pip install numpy
-RUN python -m pip install aeneas
-RUN python -m pip install mutagen
-RUN python -m pip install html5lib
+RUN pip3 install numpy
+RUN pip3 install mutagen html5lib aeneas
 
 RUN yarn
 CMD ["yarn", "dev"]

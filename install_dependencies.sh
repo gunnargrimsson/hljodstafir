@@ -64,4 +64,4 @@
     apt-get install -y python-dev python-pip
     echo "[INFO] B.4 Installing common libs using apt-get... done"
 
-echo "[INFO] Congratulations, now you can use aeneas!"
+echo "[INFO] Congratulations, now you can use aeneas!!"
