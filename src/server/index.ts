@@ -27,15 +27,15 @@ const ignoreUploadFolderNames = ['temp'];
 		app.use(express.urlencoded({ extended: true, limit: '1gb' }));
 		const server = http.createServer(app);
 		const io: Server = initIO(server);
-
-		// Make sure folders exist if not create them
-		const folders = [
-			'./src/public/uploads',
-			'./src/public/output',
-			'./src/public/logs',
-			'./src/public/uploads/temp',
-			'./src/public/uploads/temp/logs',
-		];
+		
+		const { uploadPath, tempPath, tempLogsPath, outputPath, logsPath } = {
+			uploadPath: './src/public/uploads',
+			tempPath: './src/public/uploads/temp',
+			tempLogsPath: './src/public/uploads/temp/logs',
+			outputPath: './src/public/output',
+			logsPath: './src/public/logs',
+		};
+		const folders = [uploadPath, tempPath, tempLogsPath, outputPath, logsPath];
 		for (const folder of folders) {
 			if (!fs.existsSync(folder)) {
 				fs.mkdirSync(folder);
@@ -44,7 +44,7 @@ const ignoreUploadFolderNames = ['temp'];
 
 		const upload = multer({
 			storage: multer.diskStorage({
-				destination: './src/public/uploads',
+				destination: uploadPath,
 				filename: (req, file, cb) => {
 					cb(null, `${dayjs().toISOString().replaceAll(timeRegex, '_')}_remove-timestamp_${file.originalname}`);
 				},
@@ -55,7 +55,7 @@ const ignoreUploadFolderNames = ['temp'];
 		const uploadFiles = upload.array('files');
 
 		app.post('/api/upload', uploadFiles, async (req, res) => {
-			const filenames = fs.readdirSync('./src/public/uploads');
+			const filenames = fs.readdirSync(uploadPath);
 			// ignore upload folder names
 			const filteredFilenames = filenames.filter((filename) => !ignoreUploadFolderNames.includes(filename));
 			// sort files by upload time
@@ -149,14 +149,12 @@ const ignoreUploadFolderNames = ['temp'];
 
 		const deleteTempFiles = () => {
 			try {
-				const uploadPath = './src/public/uploads/';
-				const tempLogsPath = './src/public/uploads/temp/logs/';
-				const ignoreFolder = ['./src/public/uploads/temp'];
+				const ignoreFolder = [tempPath];
 				const uploads = fs.readdirSync(uploadPath);
 				const tempLogs = fs.readdirSync(tempLogsPath);
 				// prepend path to files
-				const uploadsWithPath = uploads.map((file) => `${uploadPath}${file}`);
-				const tempLogsWithPath = tempLogs.map((file) => `${tempLogsPath}${file}`);
+				const uploadsWithPath = uploads.map((file) => `${uploadPath}/${file}`);
+				const tempLogsWithPath = tempLogs.map((file) => `${tempLogsPath}/${file}`);
 				const files24h = [...uploadsWithPath, ...tempLogsWithPath];
 				// filter out files that are in ignore folder
 				const filteredFiles = files24h.filter((file) => !ignoreFolder.includes(file));
@@ -181,12 +179,10 @@ const ignoreUploadFolderNames = ['temp'];
 
 		const deleteExpiredFiles = (expiresInDays: number) => {
 			try {
-				const outputPath = './src/public/output/';
-				const logsPath = './src/public/logs/';
 				const outputUserFolders = fs.readdirSync(outputPath);
 				const logsUserFolders = fs.readdirSync(logsPath);
-				const outputUserFoldersWithPath = outputUserFolders.map((userFolder) => `${outputPath}${userFolder}`);
-				const logsUserFoldersWithPath = logsUserFolders.map((userFolder) => `${logsPath}${userFolder}`);
+				const outputUserFoldersWithPath = outputUserFolders.map((userFolder) => `${outputPath}/${userFolder}`);
+				const logsUserFoldersWithPath = logsUserFolders.map((userFolder) => `${logsPath}/${userFolder}`);
 				const folders = [...outputUserFoldersWithPath, ...logsUserFoldersWithPath];
 				for (const userFolder of folders) {
 					// check if file is older than 7 days if so delete it
@@ -197,24 +193,24 @@ const ignoreUploadFolderNames = ['temp'];
 						const now = dayjs();
 						const diff = now.diff(fileAge, 'day');
 						if (diff > expiresInDays) {
-							fs.unlinkSync(`${outputPath}${userFolder}/${file}`);
+							fs.unlinkSync(`${outputPath}/${userFolder}/${file}`);
 						}
 					}
 				}
 			} catch (error) {
 				console.error(error);
 			}
-		}
+		};
 
 		// Deletes temp files every 24 hours
 		const tempCleanCron = new CronJob('0 0 * * *', () => {
-			deleteTempFiles()
+			deleteTempFiles();
 		});
 
 		// Deletes expired output/logs files every 24 hours
 		const outputCleanCron = new CronJob('0 0 * * *', () => {
 			const expiresInDays = 7;
-			deleteExpiredFiles(expiresInDays)
+			deleteExpiredFiles(expiresInDays);
 		});
 
 		if (!tempCleanCron.running) {
