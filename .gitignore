@@ -35,9 +35,9 @@ yarn-error.log*
 
 # custom
 .vscode/
-src/public/uploads/*
-src/public/output/*
-src/public/logs/*
+public/uploads/*
+public/output/*
+public/logs/*
 dist/
 hours/
 **/__pycache__/
