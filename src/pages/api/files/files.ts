@@ -12,6 +12,9 @@ const handler = async (req: any, res: any) => {
 export const getFiles = async (userID: string) => {
 	try {
 		const fileLoc = path.join('src', 'public', 'output', userID);
+		if (!fs.existsSync(fileLoc)) {
+			fs.mkdirSync(fileLoc);
+		}
 		const files = fs.readdirSync(fileLoc);
 		const mapFiles = files
 			.sort((a, b) => {
@@ -40,6 +43,9 @@ export const getFiles = async (userID: string) => {
 export const getLogs = async (userID: string) => {
 	try {
 		const fileLoc = path.join('src', 'public', 'logs', userID);
+		if (!fs.existsSync(fileLoc)) {
+			fs.mkdirSync(fileLoc);
+		}
 		const files = fs.readdirSync(fileLoc);
 		const mapLogs = files
 			.sort((a, b) => {
