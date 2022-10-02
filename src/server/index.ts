@@ -71,10 +71,11 @@ const ignoreUploadFolderNames = ['temp'];
 		});
 
 		// download file
-		app.get('/api/download/output/:location/:file', async (req, res) => {
+		app.get('/api/download/:location/:userID/:file', async (req, res) => {
 			const file = req.params.file;
 			const location = req.params.location;
-			res.download(`./src/public/output/${location}/${file}`);
+			const userID = req.params.userID;
+			res.download(`./src/public/${location}/${userID}/${file}`);
 			res.status(200);
 		});
 
