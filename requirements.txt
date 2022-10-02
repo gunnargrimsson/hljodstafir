@@ -1,4 +1,0 @@
-numpy
-aeneas
-mutagen
-html5lib
