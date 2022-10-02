@@ -30,7 +30,13 @@ const ignoreUploadFolderNames = ['temp'];
 		const io: Server = initIO(server);
 
 		// Make sure folders exist if not create them
-		const folders = ['./src/public/uploads', './src/public/output', './src/public/logs'];
+		const folders = [
+			'./src/public/uploads',
+			'./src/public/output',
+			'./src/public/logs',
+			'./src/public/uploads/temp',
+			'./src/public/uploads/temp/logs',
+		];
 		for (const folder of folders) {
 			if (!fs.existsSync(folder)) {
 				fs.mkdirSync(folder);
@@ -103,7 +109,7 @@ const ignoreUploadFolderNames = ['temp'];
 			const namespace = process.env.NEXTAUTH_UUID_NAMESPACE;
 			if (namespace) {
 				const userID = uuidv5(clientEmail, namespace);
-				socket.userID = userID; 
+				socket.userID = userID;
 			}
 			sessionStore[socket.sessionID] = { userID: socket.userID, sessionID: socket.sessionID };
 			next();

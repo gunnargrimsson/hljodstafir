@@ -23,8 +23,7 @@ COPY . .
 
 RUN bash install_dependencies.sh
 
-RUN python -m pip install numpy
-RUN python -m pip install aeneas
+RUN python -m pip install -r requirements.txt
 
 RUN yarn
 CMD ["yarn", "dev"]
