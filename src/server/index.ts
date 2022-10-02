@@ -4,20 +4,19 @@ import multer from 'multer';
 import fs from 'fs';
 import ascanius from './controllers/ascanius';
 import http from 'http';
+import dayjs from 'dayjs';
 import { initIO } from './controllers/socket';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import { v5 as uuidv5 } from 'uuid';
 import { extendedSocket, IOptions } from '../interfaces';
-import dayjs from 'dayjs';
+import { CronJob } from 'cron';
 
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 const port = process.env.PORT || 3000;
 const ignoreUploadFolderNames = ['temp'];
-
-// TODO: Add a way to delete files from the server on a schedule (cron job) (uploads then users old files)
 
 (async () => {
 	try {
@@ -147,6 +146,83 @@ const ignoreUploadFolderNames = ['temp'];
 		app.all('*', (req: Request, res: Response) => {
 			return handle(req, res);
 		});
+
+		const deleteTempFiles = () => {
+			try {
+				const uploadPath = './src/public/uploads/';
+				const tempLogsPath = './src/public/uploads/temp/logs/';
+				const ignoreFolder = ['./src/public/uploads/temp'];
+				const uploads = fs.readdirSync(uploadPath);
+				const tempLogs = fs.readdirSync(tempLogsPath);
+				// prepend path to files
+				const uploadsWithPath = uploads.map((file) => `${uploadPath}${file}`);
+				const tempLogsWithPath = tempLogs.map((file) => `${tempLogsPath}${file}`);
+				const files24h = [...uploadsWithPath, ...tempLogsWithPath];
+				// filter out files that are in ignore folder
+				const filteredFiles = files24h.filter((file) => !ignoreFolder.includes(file));
+				for (const file of filteredFiles) {
+					// check if file/folder is older than 24 hours if so delete it
+					const stats = fs.statSync(file);
+					const fileAge = dayjs(stats.birthtime);
+					const now = dayjs();
+					const diff = now.diff(fileAge, 'hour');
+					if (diff > 24) {
+						if (stats.isDirectory()) {
+							fs.rmdirSync(file, { recursive: true });
+						} else {
+							fs.unlinkSync(`${file}`);
+						}
+					}
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		const deleteExpiredFiles = (expiresInDays: number) => {
+			try {
+				const outputPath = './src/public/output/';
+				const logsPath = './src/public/logs/';
+				const outputUserFolders = fs.readdirSync(outputPath);
+				const logsUserFolders = fs.readdirSync(logsPath);
+				const outputUserFoldersWithPath = outputUserFolders.map((userFolder) => `${outputPath}${userFolder}`);
+				const logsUserFoldersWithPath = logsUserFolders.map((userFolder) => `${logsPath}${userFolder}`);
+				const folders = [...outputUserFoldersWithPath, ...logsUserFoldersWithPath];
+				for (const userFolder of folders) {
+					// check if file is older than 7 days if so delete it
+					const files = fs.readdirSync(`${userFolder}`);
+					for (const file of files) {
+						const stats = fs.statSync(`${userFolder}/${file}`);
+						const fileAge = dayjs(stats.birthtime);
+						const now = dayjs();
+						const diff = now.diff(fileAge, 'day');
+						if (diff > expiresInDays) {
+							fs.unlinkSync(`${outputPath}${userFolder}/${file}`);
+						}
+					}
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		// Deletes temp files every 24 hours
+		const tempCleanCron = new CronJob('0 0 * * *', () => {
+			deleteTempFiles()
+		});
+
+		// Deletes expired output/logs files every 24 hours
+		const outputCleanCron = new CronJob('0 0 * * *', () => {
+			const expiresInDays = 7;
+			deleteExpiredFiles(expiresInDays)
+		});
+
+		if (!tempCleanCron.running) {
+			tempCleanCron.start();
+		}
+		if (!outputCleanCron.running) {
+			outputCleanCron.start();
+		}
 
 		server.listen(port, (err?: Error) => {
 			if (err) throw err;
