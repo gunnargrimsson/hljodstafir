@@ -15,6 +15,7 @@ import Container from '../components/Container';
 import { useSession } from 'next-auth/react';
 import { useCookies } from "react-cookie"
 import { GetServerSidePropsContext } from 'next';
+import { useRouter } from 'next/router';
 // import Languages from '../constants/languages.json';
 
 const socket: clientExtendedSocket = io('/', { autoConnect: false });
@@ -43,7 +44,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 	const [longerAudio, setLongerAudio] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [client, setClient] = useCookies(["clientInfo"]);
-
+	const router = useRouter();
 	const { data: session } = useSession();
 
 	const connectUser = async () => {
@@ -121,7 +122,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 			socket.off('ascanius-relay');
 			socket.off('user-connected');
 		};
-	}, [messages, files, session, client]);
+	}, [messages, files, session]);
 
 	const onChange = async (formData: FormData) => {
 		nProgress.configure({ showSpinner: true });
@@ -185,6 +186,13 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 		setCanCloseMessages(false);
 		setMessages([]);
 	};
+
+	if (loading) {
+		return <></>;
+	}
+	if (!session) {
+		router.push('/auth/signin');
+	}
 
 	return (
 		<Container>
@@ -371,13 +379,6 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 						</div>
 					</main>
 				</>
-			)}
-			{!session && !loading ? (
-				<div className='h-full w-full bg-stone-200 flex flex-1 flex-col place-items-center place-content-center text-5xl font-light'>
-					Please log in to use Hljóðstafir
-				</div>
-			) : (
-				<></>
 			)}
 		</Container>
 	);

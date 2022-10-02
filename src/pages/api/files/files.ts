@@ -11,7 +11,7 @@ const handler = async (req: any, res: any) => {
 
 export const getFiles = async (userID: string) => {
 	try {
-		const fileLoc = path.join('src', 'public', 'output', userID);
+		const fileLoc = path.join('public', 'output', userID);
 		if (!fs.existsSync(fileLoc)) {
 			fs.mkdirSync(fileLoc);
 		}
@@ -42,7 +42,7 @@ export const getFiles = async (userID: string) => {
 
 export const getLogs = async (userID: string) => {
 	try {
-		const fileLoc = path.join('src', 'public', 'logs', userID);
+		const fileLoc = path.join('public', 'logs', userID);
 		if (!fs.existsSync(fileLoc)) {
 			fs.mkdirSync(fileLoc);
 		}

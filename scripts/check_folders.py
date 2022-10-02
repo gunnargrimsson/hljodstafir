@@ -3,9 +3,9 @@ import os
 
 def check_if_folders_exists(userID: str):
     """Creates public/logs and public/output directories if they don't exist"""
-    upload_folder = './src/public/uploads/'
-    output_folder = f'./src/public/output/{userID}/'
-    logs_folder = f'./src/public/logs/{userID}/'
+    upload_folder = './public/uploads/'
+    output_folder = f'./public/output/{userID}/'
+    logs_folder = f'./public/logs/{userID}/'
     # check if ./public/logs exists
     if not os.path.exists(logs_folder):
         # create ./public/logs directory

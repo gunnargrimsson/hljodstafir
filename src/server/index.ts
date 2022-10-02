@@ -29,11 +29,11 @@ const ignoreUploadFolderNames = ['temp'];
 		const io: Server = initIO(server);
 
 		const { uploadPath, tempPath, tempLogsPath, outputPath, logsPath } = {
-			uploadPath: './src/public/uploads',
-			tempPath: './src/public/uploads/temp',
-			tempLogsPath: './src/public/uploads/temp/logs',
-			outputPath: './src/public/output',
-			logsPath: './src/public/logs',
+			uploadPath: './public/uploads',
+			tempPath: './public/uploads/temp',
+			tempLogsPath: './public/uploads/temp/logs',
+			outputPath: './public/output',
+			logsPath: './public/logs',
 		};
 		const folders = [uploadPath, tempPath, tempLogsPath, outputPath, logsPath];
 		for (const folder of folders) {
@@ -74,14 +74,14 @@ const ignoreUploadFolderNames = ['temp'];
 			const file = req.params.file;
 			const location = req.params.location;
 			const userID = req.params.userID;
-			res.download(`./src/public/${location}/${userID}/${file}`);
+			res.download(`./public/${location}/${userID}/${file}`);
 			res.status(200);
 		});
 
 		app.post('/api/delete', async (req, res) => {
 			const file = req.body.file;
 			try {
-				fs.unlinkSync(`./src/public/${file}`);
+				fs.unlinkSync(`./public/${file}`);
 				res.status(200).json({ success: true, message: 'File deleted' });
 			} catch (error) {
 				console.error('File not found');
