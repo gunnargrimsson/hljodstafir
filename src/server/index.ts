@@ -27,7 +27,7 @@ const ignoreUploadFolderNames = ['temp'];
 		app.use(express.urlencoded({ extended: true, limit: '1gb' }));
 		const server = http.createServer(app);
 		const io: Server = initIO(server);
-		
+
 		const { uploadPath, tempPath, tempLogsPath, outputPath, logsPath } = {
 			uploadPath: './src/public/uploads',
 			tempPath: './src/public/uploads/temp',
@@ -147,7 +147,7 @@ const ignoreUploadFolderNames = ['temp'];
 			return handle(req, res);
 		});
 
-		const deleteTempFiles = () => {
+		const deleteTempFiles = (keepTempFilesFor: number) => {
 			try {
 				const ignoreFolder = [tempPath];
 				const uploads = fs.readdirSync(uploadPath);
@@ -164,7 +164,7 @@ const ignoreUploadFolderNames = ['temp'];
 					const fileAge = dayjs(stats.birthtime);
 					const now = dayjs();
 					const diff = now.diff(fileAge, 'hour');
-					if (diff > 24) {
+					if (diff > keepTempFilesFor) {
 						if (stats.isDirectory()) {
 							fs.rmdirSync(file, { recursive: true });
 						} else {
@@ -203,12 +203,13 @@ const ignoreUploadFolderNames = ['temp'];
 		};
 
 		// Deletes temp files every 24 hours
-		const tempCleanCron = new CronJob('0 0 * * *', () => {
-			deleteTempFiles();
+		const tempCleanCron = new CronJob('* * * * *', () => {
+			const keepTempFilesFor = 24;
+			deleteTempFiles(keepTempFilesFor);
 		});
 
 		// Deletes expired output/logs files every 24 hours
-		const outputCleanCron = new CronJob('0 0 * * *', () => {
+		const outputCleanCron = new CronJob('* * * * *', () => {
 			const expiresInDays = 7;
 			deleteExpiredFiles(expiresInDays);
 		});
