@@ -1,6 +1,6 @@
-import { GetServerSidePropsContext, NextPageContext } from 'next';
+import { GetServerSidePropsContext } from 'next';
 import { BuiltInProviderType } from 'next-auth/providers';
-import { ClientSafeProvider, getProviders, LiteralUnion, signIn, useSession } from 'next-auth/react';
+import { ClientSafeProvider, getProviders, LiteralUnion, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
 const signin = ({
@@ -8,7 +8,6 @@ const signin = ({
 }: {
 	providers: Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>;
 }) => {
-	const { data: session } = useSession();
 	const router = useRouter();
 
 	return (

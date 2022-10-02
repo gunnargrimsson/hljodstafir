@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { QuestionMark } from 'tabler-icons-react';
 import { getFiles, getLogs, getAppVersion } from './api/files';

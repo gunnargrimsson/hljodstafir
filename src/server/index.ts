@@ -29,6 +29,14 @@ const ignoreUploadFolderNames = ['temp'];
 		const server = http.createServer(app);
 		const io: Server = initIO(server);
 
+		// Make sure folders exist if not create them
+		const folders = ['./src/public/uploads', './src/public/output', './src/public/logs'];
+		for (const folder of folders) {
+			if (!fs.existsSync(folder)) {
+				fs.mkdirSync(folder);
+			}
+		}
+
 		const upload = multer({
 			storage: multer.diskStorage({
 				destination: './src/public/uploads',
