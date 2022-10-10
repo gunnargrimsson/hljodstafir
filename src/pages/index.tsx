@@ -41,7 +41,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 	const [adjusting, setAdjusting] = useState<boolean>(false);
 	const [parentHighlighting, setParentHighlighting] = useState<boolean>(false);
 	const [adjustment, setAdjustment] = useState<number>(125);
-	const [longerAudio, setLongerAudio] = useState<boolean>(false);
+	// const [longerAudio, setLongerAudio] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [client, setClient] = useCookies(["clientInfo"]);
 	const router = useRouter();
@@ -149,7 +149,6 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 					ignoreAside: ignoreAside,
 					adjustment: adjusting ? adjustment : 0,
 					parentHighlighting: parentHighlighting,
-					longerAudio: longerAudio,
 				});
 			} catch (error) {
 				console.error(error);
@@ -299,7 +298,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 													</Tooltip>
 												</label>
 											</div>
-											<div className='flex gap-2 place-items-center rounded-sm'>
+											{/* <div className='flex gap-2 place-items-center rounded-sm'>
 												<input
 													className='w-4 h-4'
 													checked={longerAudio}
@@ -316,7 +315,7 @@ const IndexPage = ({ mapFiles, mapLogs, appVersion }: IProps) => {
 														/>
 													</Tooltip>
 												</label>
-											</div>
+											</div> */}
 										</div>
 									</div>
 									<FileInputButton

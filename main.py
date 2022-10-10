@@ -28,8 +28,8 @@ if __name__ == "__main__":
     adjustment = int(sys.argv[4]) if len(sys.argv) >= 5 else 100
     parent_highlighting = sys.argv[5] == "true" if len(
         sys.argv) >= 6 else False
-    allow_longer_mp3 = sys.argv[6] == "true" if len(sys.argv) >= 7 else False
-    userID = sys.argv[7] if len(sys.argv) >= 8 else None
+    # allow_longer_mp3 = sys.argv[6] == "true" if len(sys.argv) >= 7 else False
+    userID = sys.argv[6] if len(sys.argv) >= 7 else None
     try:
         if (userID == None):
             raise Exception("No userID was provided")
@@ -56,9 +56,9 @@ if __name__ == "__main__":
         if audio_files is None:
             raise Exception("Could not find audio files in package.opf")
         # check if audio files lengths are within allowed range
-        if not allow_longer_mp3:
-            check_audio_length(mp3_max_minutes_length,
-                               foldername, location, audio_files)
+        # if not allow_longer_mp3:
+        #     check_audio_length(mp3_max_minutes_length,
+        #                        foldername, location, audio_files)
         # check if nav.xhtml exists and if its empty or not
         check_toc_nav(package_opf, foldername, location)
         # check if package.opf has meta properties that break the book

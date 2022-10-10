@@ -8,7 +8,6 @@ const ascanius = (fileName: string, userID: string, sessionID: string, io: Serve
 			ignoreAside: options.ignoreAside.toString(),
 			adjustments: options.adjustment.toString(),
 			parentHighlighting: options.parentHighlighting.toString(),
-			longerAudio: options.longerAudio.toString(),
 			userID: userID,
 		};
 		const process = spawn('python', [
@@ -18,7 +17,6 @@ const ascanius = (fileName: string, userID: string, sessionID: string, io: Serve
 			stringOptions.ignoreAside,
 			stringOptions.adjustments,
 			stringOptions.parentHighlighting,
-			stringOptions.longerAudio,
 			stringOptions.userID,
 		]);
 		// process spawn with utf 8 encoding
