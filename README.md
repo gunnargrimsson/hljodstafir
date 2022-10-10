@@ -1,6 +1,9 @@
 # Hljóðstafir
   Hljóðstafir allows you to automatically sync audio and text highlighting on a sentence level.
-  
+
+## Known Issues
+  1. Aeneas may stall without any feedback on longer audio files when running on a Windows OS, therefore it's best to run it on a distro known to support Aeneas. Debian and Ubuntu do not seem to deal with this issue.
+
   ## Docker
   Build docker image with Dockerfile
 
