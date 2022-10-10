@@ -1,7 +1,6 @@
-#  Hljóðstafir
-  Next.js webapp utilizing a new and improved Ascanius for EPUB files
-
-# Setup
+# Hljóðstafir
+  Hljóðstafir allows you to automatically sync audio and text highlighting on a sentence level.
+  
   ## Docker
   Build docker image with Dockerfile
 
