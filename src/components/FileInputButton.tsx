@@ -30,7 +30,7 @@ const FileInputButton = ({ acceptedFileTypes, allowMultipleFiles, label, onChang
 
 	return (
 		<form ref={formRef} className='flex place-content-center'>
-			<button className='bg-blue-700 px-4 py-2 text-white rounded-sm' type='button' onClick={onClickHandler}>
+			<button className='bg-primary font-bold text-white px-3 py-1 rounded-sm ring-1 ring-black hover:text-white hover:bg-black' type='button' onClick={onClickHandler}>
 				{label}
 			</button>
 			<input

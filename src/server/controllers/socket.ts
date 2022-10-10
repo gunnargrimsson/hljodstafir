@@ -1,8 +1,8 @@
 import { Server } from 'socket.io';
 
-let io;
+let io: any;
 
-const initIO = (server) => {
+const initIO = (server: any) => {
   io = new Server(server);
   return io;
 };

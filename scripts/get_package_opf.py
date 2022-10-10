@@ -3,16 +3,18 @@ from os.path import isfile, join
 import sys
 from scripts.logger import Logger
 
+from config import Config
 
-def get_package_opf(foldername: str, logger: Logger):
+
+def get_package_opf(logger: Logger):
     """Gets the package.opf file from the epub file and its location."""
     possible_locations = ['EPUB/', 'EPUB/Content/', 'OEBPS/', 'GoogleDoc/']
     opf_files = None
     found_location = None
     for location in possible_locations:
         try:
-            opf_files = [f for f in listdir("./public/uploads/{}/{}".format(foldername, location)) if isfile(
-                join("./public/uploads/{}/{}".format(foldername, location), f)) and f == 'package.opf']
+            opf_files = [f for f in listdir(f"{Config.upload_folder}{Config.folder_name}/{location}") if isfile(
+                join(f"{Config.upload_folder}{Config.folder_name}/{location}", f)) and f == 'package.opf']
             if opf_files:
                 found_location = location
                 break
@@ -23,10 +25,10 @@ def get_package_opf(foldername: str, logger: Logger):
 
     if not found_location:
         logger.print_and_flush(
-            "ERROR: No package.opf found in {}".format(foldername))
+            f"ERROR: No package.opf found in {Config.folder_name}")
         return False
 
-    with open('././public/uploads/{}/{}/package.opf'.format(foldername, found_location), 'r', encoding='utf8') as f:
+    with open(f'./{Config.upload_folder}{Config.folder_name}/{found_location}/package.opf', 'r', encoding='utf8') as f:
         opf_file = f.read()
 
     return opf_file, found_location

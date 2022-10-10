@@ -56,8 +56,8 @@ const Messages = ({
 									title={new Date(message.delivered).toLocaleString('en-GB').replace(',', '')}
 								>
 									<Blockquote className='prose-lg' cite={null} icon={null}>
-										{messageLines.map((line) => {
-											return <div className=''>{line}</div>;
+										{messageLines.map((line, idx) => {
+											return <div key={idx} className=''>{line}</div>;
 										})}
 									</Blockquote>
 								</Timeline.Item>

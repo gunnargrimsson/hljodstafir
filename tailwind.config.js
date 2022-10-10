@@ -2,8 +2,8 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -12,7 +12,8 @@ module.exports = {
       },
       colors: {
         'coffee': '#c0ffee',
-        'pink': '#FFC0EE'
+        'pink': '#FFC0EE',
+        'primary': '#103b70',
       },
       boxShadow: {
         'red': '0px 0px 0px 1px rgba(185, 28, 28,1)'
